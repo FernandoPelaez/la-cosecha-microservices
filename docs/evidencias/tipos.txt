@@ -1,0 +1,10 @@
+Salida conservada. Se omitieron advertencias de proxy del entorno y registros JSON de solicitudes de prueba.
+
+
+> la-cosecha@3.0.0 typecheck
+> npm run typecheck --workspace @cosecha/web && tsc -p tsconfig.services.json
+
+
+> @cosecha/web@3.0.0 typecheck
+> tsc --noEmit
+

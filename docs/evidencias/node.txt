@@ -1,0 +1,67 @@
+Salida conservada. Se omitieron advertencias de proxy del entorno y registros JSON de solicitudes de prueba.
+
+
+> la-cosecha@3.0.0 test
+> node --import tsx --test tests/*.test.mjs
+
+✔ BFF rechaza modificaciones originadas fuera de la tienda y rutas arbitrarias (9.609421ms)
+✔ BFF guarda el token solo en cookie HttpOnly y envía el usuario al navegador (5.094777ms)
+✔ BFF traduce el error heredado de proveedores al contrato de la aplicación (1.627295ms)
+✔ BFF no borra la cookie cuando el servicio rechaza cerrar la sesión (1.171033ms)
+✔ servicios privados rechazan llamadas directas y sesiones manipuladas (423.150706ms)
+✔ cliente autenticado no puede modificar inventario ni acceder a compras (28.617814ms)
+✔ registro exige correo, teléfono y contraseña válidos antes de contactar servicios (7.229188ms)
+Error del servicio: VALIDATION Consulta el identificador de correlación; se omiten datos sensibles
+✔ sin configuración antibot no se permite un login (4.857078ms)
+✔ domicilio y carrito inválidos no escriben en la base (11.615033ms)
+✔ checkout rechaza SPEI en backend aunque se inyecte su id (11.463088ms)
+✔ webhook sin firma válida no puede marcar una venta como pagada (4.322821ms)
+✔ una reseña exige compra previa y no acepta al visitante (37.451734ms)
+✔ consultas internas de identidad no consumen el límite de formularios de acceso (76.750566ms)
+✔ una base ajena se rechaza antes de ejecutar migraciones (1.547838ms)
+✔ los nombres de base no admiten inyección ni esquemas del sistema (0.368773ms)
+✔ el checksum detecta una migración cambiada y el plan conserva DDL (1.321785ms)
+✔ sin SMTP se conserva la cola sin afirmar un envío (2.423777ms)
+✔ si SMTP rechaza el comprobante, se programa reintento sin tocar la venta (373.543778ms)
+✔ un cliente no puede conciliar ni cancelar un pedido ajeno (2.905796ms)
+✔ el retorno anterior al webhook confirma el pago consultado al proveedor (1.78339ms)
+✔ el retorno posterior al webhook no crea otra venta ni consulta de nuevo (0.313842ms)
+✔ un pago pendiente conserva existencias reservadas y no acredita la venta (2.530444ms)
+✔ cancelar exige expiración confirmada y devuelve stock una sola vez (1.045017ms)
+✔ si se cobra al mismo tiempo que se cancela, se concilia sin liberar stock (3.14625ms)
+✔ sin referencia confirmada no se libera la reserva a ciegas (0.453708ms)
+✔ el fallo asíncrono firmado libera la reserva y registra rechazo (0.558051ms)
+✔ reembolso pending: recupera metadata y no duplica la solicitud (1.663478ms)
+✔ reembolso succeeded: recupera metadata y no duplica la solicitud (0.874036ms)
+✔ reembolso failed: recupera metadata y no duplica la solicitud (0.336375ms)
+✔ los importes conservan centavos y rechazan valores ambiguos o fuera del SQL (4.474355ms)
+✔ las ofertas usan el mejor descuento, no se acumulan ni crean precios negativos (0.232833ms)
+✔ solo las denominaciones explícitas de tarjeta son aceptadas (0.240544ms)
+✔ devoluciones: se descuentan todas las solicitudes no rechazadas (0.512183ms)
+✔ producto valida límites, precio y conserva únicamente las fotos oficiales (7.686711ms)
+✔ las ofertas no admiten porcentajes imposibles ni fechas invertidas (1.961586ms)
+✔ empaquetado conserva validaciones de peso y dimensiones de Fernando (1.404487ms)
+✔ CSV escapa comillas, separadores y fórmulas con espacios o tabuladores (0.458445ms)
+✔ ticket genera un PDF real, incluso con muchas líneas (447.551529ms)
+✔ bcrypt almacena un hash con sal y no admite una contraseña distinta (1131.812491ms)
+✔ tokens de recuperación se transforman en hash irreversible de longitud fija (0.939162ms)
+✔ sesión firmada: duración, emisor y revocación consultada en cada petición (18.183615ms)
+✔ una firma correcta con audiencia incorrecta no obtiene acceso (2.549015ms)
+✔ clave interna y roles se validan en backend, incluso con entrada Unicode (0.548888ms)
+✔ Turnstile verifica éxito, acción y hostname en el servidor (4.901133ms)
+✔ sin existencias: no hay UPDATE ni movimiento y la transacción revierte (2.527419ms)
+✔ entrada escribe saldo y bitácora en la misma conexión; un fallo en bitácora revierte (2.791257ms)
+✔ pago confirmado produce exactamente venta, detalles, comprobante y envío (1.23687ms)
+✔ el mismo evento repetido termina sin crear una segunda venta (0.39438ms)
+✔ importe o moneda incorrectos revierten hasta el registro de evento (0.343416ms)
+✔ la expiración confirmada libera la reserva; no registra una venta (15.634748ms)
+✔ un cliente no puede solicitar devolución de una venta ajena (0.695503ms)
+✔ recibir dos veces una devolución no reintegra inventario dos veces (21.963235ms)
+ℹ tests 52
+ℹ suites 0
+ℹ pass 52
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1647.942684

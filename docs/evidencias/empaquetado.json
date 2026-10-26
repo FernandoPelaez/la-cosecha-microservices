@@ -1,0 +1,45 @@
+{
+  "fecha": "2026-10-22",
+  "zona": "America/Mazatlan",
+  "archivo": "la-cosecha.zip",
+  "raiz": "la-cosecha/",
+  "alcance": "Revisión de contenido anterior a compresión; el generador comprueba después CRC y rutas obligatorias.",
+  "archivos_de_contenido": 218,
+  "archivos_con_este_informe": 219,
+  "digest_lista_ordenada_rutas_y_sha256": "afa525d3649a4b9b92420c60f74ed8fa24c27670c2cbf5ab13a29140fe41b921",
+  "excluidos": [
+    ".bak",
+    ".env y demás entornos privados",
+    ".git",
+    ".log",
+    ".next",
+    ".openai",
+    ".pyc",
+    ".pytest_cache",
+    ".tmp",
+    ".tsbuildinfo",
+    ".venv",
+    ".zip",
+    "__pycache__",
+    "bin",
+    "node_modules",
+    "obj",
+    "test-results"
+  ],
+  "entornos_incluidos": [
+    ".env.example",
+    ".env.test.example"
+  ],
+  "credenciales_reales_incluidas": false,
+  "identificadores_ficticios": "Las claves local_contract_only son fixtures no funcionales documentadas.",
+  "clave_privada_o_patron_credencial_detectado": false,
+  "migraciones_sql": 5,
+  "fotos_oficiales": 15,
+  "matriz": {
+    "requisitos": 31,
+    "columnas": 9
+  },
+  "referencias_documentacion": "rutas verificadas; este informe se añade en el cierre",
+  "dependencias_compilaciones_temporales_incluidos": false,
+  "instalacion": "README.md, npm ci y npm run setup; paquetes bloqueados, no instalados dentro del ZIP"
+}

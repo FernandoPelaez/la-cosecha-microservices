@@ -1,0 +1,6 @@
+Salida conservada. Se omitieron advertencias de proxy del entorno y registros JSON de solicitudes de prueba.
+
+
+> la-cosecha@3.0.0 lint
+> eslint apps/web/src services packages scripts tests
+

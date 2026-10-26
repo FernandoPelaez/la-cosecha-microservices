@@ -1,0 +1,65 @@
+{
+  "name": "la-cosecha",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "configure": "node scripts/configure.mjs",
+    "setup": "node scripts/setup.mjs",
+    "dev": "node --env-file=.env scripts/dev.mjs",
+    "dev:web": "node --env-file=.env scripts/dev.mjs --web-only",
+    "dev:services": "node --env-file=.env scripts/dev.mjs --services-only",
+    "start": "node --env-file=.env scripts/dev.mjs --production",
+    "build": "npm run build --workspace @cosecha/web",
+    "build:services": "node scripts/build-services.mjs",
+    "typecheck": "npm run typecheck --workspace @cosecha/web && tsc -p tsconfig.services.json",
+    "lint": "eslint apps/web/src services packages scripts tests",
+    "test": "node --import tsx --test tests/*.test.mjs",
+    "test:python": "python -m unittest discover -s tests/python",
+    "test:integration": "node --env-file=.env.test --import tsx --test --test-concurrency=1 tests/integration/*.test.mjs",
+    "test:e2e": "node --env-file=.env.test --import tsx --test tests/e2e/*.test.mjs",
+    "db:migrate": "node --env-file=.env scripts/migrate.mjs",
+    "db:seed": "node --env-file=.env scripts/seed.mjs",
+    "admin:create": "node --env-file=.env scripts/create-admin.mjs",
+    "payments:reconcile": "node --env-file=.env scripts/reconcile-payments.mjs",
+    "receipts:deliver": "node --env-file=.env scripts/deliver-receipts.mjs",
+    "diagnose": "node --env-file=.env scripts/diagnose.mjs",
+    "package": "python scripts/package.py",
+    "configure:test": "node scripts/configure.mjs --test",
+    "dev:services:test": "node --env-file=.env.test scripts/dev.mjs --services-only",
+    "db:migrate:test": "node --env-file=.env.test scripts/migrate.mjs",
+    "db:seed:test": "node --env-file=.env.test scripts/seed.mjs",
+    "qa:up": "docker compose --env-file .env.test -f compose.qa.yml up -d --wait",
+    "qa:down": "docker compose --env-file .env.test -f compose.qa.yml down"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "jose": "^6.1.0",
+    "mysql2": "^3.15.0",
+    "nodemailer": "7.0.11",
+    "pdfkit": "^0.17.2",
+    "stripe": "23.0.0",
+    "zod": "^4.1.0",
+    "tsx": "^4.20.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^22.18.0",
+    "eslint": "^9.39.0",
+    "globals": "^16.4.0",
+    "prettier": "^3.8.1",
+    "supertest": "^7.1.0",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.46.0"
+  }
+}

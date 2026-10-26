@@ -1,0 +1,92 @@
+[
+  {
+    "legacy_id": 1,
+    "name": "Salsa Macha con Ajo",
+    "price_cents": 5500,
+    "image": "/images/la_cosecha_salsa_01.png"
+  },
+  {
+    "legacy_id": 2,
+    "name": "Salsa de Chiltepín",
+    "price_cents": 6200,
+    "image": "/images/la_cosecha_salsa_02.png"
+  },
+  {
+    "legacy_id": 3,
+    "name": "Salsa Roja Tatemada",
+    "price_cents": 6900,
+    "image": "/images/la_cosecha_salsa_03.png"
+  },
+  {
+    "legacy_id": 4,
+    "name": "Salsa Verde Asada",
+    "price_cents": 6500,
+    "image": "/images/la_cosecha_salsa_04.png"
+  },
+  {
+    "legacy_id": 5,
+    "name": "Salsa de Habanero",
+    "price_cents": 7500,
+    "image": "/images/la_cosecha_salsa_05.png"
+  },
+  {
+    "legacy_id": 6,
+    "name": "Salsa de Chile de Árbol",
+    "price_cents": 7200,
+    "image": "/images/la_cosecha_salsa_06.png"
+  },
+  {
+    "legacy_id": 7,
+    "name": "Salsa de Cacahuate",
+    "price_cents": 7400,
+    "image": "/images/la_cosecha_salsa_07.png"
+  },
+  {
+    "legacy_id": 8,
+    "name": "Salsa de Ajonjolí",
+    "price_cents": 6700,
+    "image": "/images/la_cosecha_salsa_08.png"
+  },
+  {
+    "legacy_id": 9,
+    "name": "Salsa de Mango con Habanero",
+    "price_cents": 5800,
+    "image": "/images/la_cosecha_salsa_09.png"
+  },
+  {
+    "legacy_id": 10,
+    "name": "Salsa para Mariscos",
+    "price_cents": 8500,
+    "image": "/images/la_cosecha_salsa_10.png"
+  },
+  {
+    "legacy_id": 16,
+    "name": "Salsa de Tamarindo con Chile",
+    "price_cents": 6500,
+    "image": "/images/la_cosecha_salsa_11.png"
+  },
+  {
+    "legacy_id": 17,
+    "name": "Salsa de Chile Güero",
+    "price_cents": 6000,
+    "image": "/images/la_cosecha_salsa_12.png"
+  },
+  {
+    "legacy_id": 18,
+    "name": "Salsa de Serrano Asado",
+    "price_cents": 7000,
+    "image": "/images/la_cosecha_salsa_13.png"
+  },
+  {
+    "legacy_id": 19,
+    "name": "Salsa de Aguachile Verde",
+    "price_cents": 7500,
+    "image": "/images/la_cosecha_salsa_14.png"
+  },
+  {
+    "legacy_id": 20,
+    "name": "Salsa de Aguachile Rojo",
+    "price_cents": 8000,
+    "image": "/images/la_cosecha_salsa_15.png"
+  }
+]

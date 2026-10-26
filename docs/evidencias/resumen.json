@@ -1,0 +1,73 @@
+{
+  "fecha": "2026-10-22",
+  "zona": "America/Mazatlan",
+  "verificaciones": {
+    "node": {
+      "resultado": "aprobado",
+      "salida": "node.txt",
+      "sha256_salida_original": "f6b86ca32329df20f1312ac3f4523e7643037e8aa704a7c67624ef74e9bd3bc2"
+    },
+    "lint": {
+      "resultado": "aprobado",
+      "salida": "lint.txt",
+      "sha256_salida_original": "2b0e7da94bfef2c6d7c96f98b6f55681c8ce2664a97d406a74492baa5681b954"
+    },
+    "tipos": {
+      "resultado": "aprobado",
+      "salida": "tipos.txt",
+      "sha256_salida_original": "e1e1dd153dcb95eba1a71f49d8b04d0522e2641767a5d116fc442acbb37fa8e8"
+    },
+    "build": {
+      "resultado": "aprobado",
+      "salida": "build.txt",
+      "sha256_salida_original": "df3b014d482ef2070269881535031b89f0a329f08e0e94078f1d31b141cf8ab9"
+    },
+    "python": {
+      "resultado": "10/10 aprobadas en avance recuperado",
+      "repetida_en_cierre": false,
+      "salida_local_conservada": false
+    },
+    "csharp": {
+      "resultado": "2 proyectos Release, 0 advertencias, 0 errores en avance recuperado",
+      "sdk": "10.0.100",
+      "repetida_en_cierre": false,
+      "salida_local_conservada": false
+    },
+    "mysql": {
+      "version": "8.0.46",
+      "modo": "initialize-insecure, skip-networking; directorio temporal",
+      "migraciones_ddl_aceptadas": 5,
+      "tablas_dominio": 36,
+      "integracion_tcp_probada": false
+    },
+    "visual": {
+      "origen": "HTML y recursos del build de producción, sin API",
+      "marcos_px": [
+        320,
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "clientWidth_px": [
+        305,
+        375,
+        753,
+        1009,
+        1425
+      ],
+      "scrollWidth_px": [
+        305,
+        375,
+        753,
+        1009,
+        1425
+      ],
+      "menu_320": "abierto y visible",
+      "cortina": "apertura observada",
+      "pantallas_privadas_probadas": false,
+      "emulacion_dispositivos": false
+    }
+  },
+  "integracion_y_proveedores_externos": "pendientes, véase VERIFICACIONES.md"
+}

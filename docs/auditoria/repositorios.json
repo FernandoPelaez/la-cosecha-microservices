@@ -1,0 +1,109 @@
+[
+  {
+    "repository": "AlexanderHHZ/inventario-service",
+    "url": "https://github.com/AlexanderHHZ/inventario-service.git",
+    "commit": "c26b54b222027f53928bb750af0d7b777f4dd586",
+    "files": 14,
+    "license_files": [],
+    "test_files": []
+  },
+  {
+    "repository": "Aranzazu-Acosta-Medina987/microservicio-historial-compras",
+    "url": "https://github.com/Aranzazu-Acosta-Medina987/microservicio-historial-compras.git",
+    "commit": "503d97ab6c93469bfbb9e3195278831be50a6da6",
+    "files": 3,
+    "license_files": [],
+    "test_files": []
+  },
+  {
+    "repository": "CesarKarass/RegistroPedidosService",
+    "url": "https://github.com/CesarKarass/RegistroPedidosService.git",
+    "commit": "d4c5a5e021b9021f636c3c5e8bf74c0724a8305d",
+    "files": 13,
+    "license_files": [],
+    "test_files": []
+  },
+  {
+    "repository": "FernandoPelaez/empaquetado-service",
+    "url": "https://github.com/FernandoPelaez/empaquetado-service.git",
+    "commit": "af9fa3fec3d58b2fa1ef39934dcddea94500cd83",
+    "files": 86,
+    "license_files": [],
+    "test_files": [
+      "api/tests/helpers.ts",
+      "api/tests/empaquetados.test.ts",
+      "api/tests/validation.test.ts",
+      "api/tests/infrastructure.test.ts",
+      "tests/e2e/empaquetados.spec.ts"
+    ]
+  },
+  {
+    "repository": "FernandoPelaez/garantias-devoluciones",
+    "url": "https://github.com/FernandoPelaez/garantias-devoluciones.git",
+    "commit": "57eba8e5bdebe45b485bef15d5784b6e519b908d",
+    "files": 71,
+    "license_files": [],
+    "test_files": [
+      "tests/fixture.ts",
+      "tests/warranties.test.ts",
+      "tests/returns.test.ts",
+      "tests/http.test.ts",
+      "tests/repositories.test.ts",
+      "tests/domain.test.ts"
+    ]
+  },
+  {
+    "repository": "Maik-Vol2/biblioteca-menu",
+    "url": "https://github.com/Maik-Vol2/biblioteca-menu.git",
+    "commit": "0ea2b01f944d34906028e7990fcbba3d7862b3c5",
+    "files": 5,
+    "license_files": [],
+    "test_files": []
+  },
+  {
+    "repository": "alexis22611/empaquetado-service",
+    "url": "https://github.com/alexis22611/empaquetado-service.git",
+    "commit": "078e48ea45f434939579befef06847c70de9a23b",
+    "files": 87,
+    "license_files": [],
+    "test_files": [
+      "api/tests/helpers.ts",
+      "api/tests/empaquetados.test.ts",
+      "api/tests/validation.test.ts",
+      "api/tests/infrastructure.test.ts",
+      "tests/e2e/empaquetados.spec.ts"
+    ]
+  },
+  {
+    "repository": "dasharobles/microservicio-validacion-entregas",
+    "url": "https://github.com/dasharobles/microservicio-validacion-entregas.git",
+    "commit": "16c058c25a38d127beb03f171baa2c5da4f28140",
+    "files": 19,
+    "license_files": [],
+    "test_files": [
+      "test_model.py",
+      "test_sqlalchemy.py",
+      "test_mysql.py"
+    ]
+  },
+  {
+    "repository": "nididev/comentarios-resenas-service",
+    "url": "https://github.com/nididev/comentarios-resenas-service.git",
+    "commit": "5b740174376cbcebdd82964dd66c478e291f1268",
+    "files": 8,
+    "license_files": [],
+    "test_files": []
+  },
+  {
+    "repository": "paulroddz100/microservicio_login",
+    "url": "https://github.com/paulroddz100/microservicio_login.git",
+    "commit": "9896865dc68bf2ef17da8827698bcd0b01b6de21",
+    "files": 29,
+    "license_files": [],
+    "test_files": [
+      "tests/integracion.test.js",
+      "tests/unitario.test.js",
+      "tests/setup.js"
+    ]
+  }
+]

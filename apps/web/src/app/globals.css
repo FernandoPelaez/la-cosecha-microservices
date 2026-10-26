@@ -1,0 +1,85 @@
+@import "tailwindcss";
+@import "../styles/brand.css";
+@import "../styles/store.css";
+
+@layer components {
+  .page {
+    @apply mx-auto w-full max-w-360 px-4 py-6 sm:px-6 lg:px-9;
+  }
+
+  .page-title {
+    @apply font-display text-3xl leading-tight tracking-tight sm:text-4xl;
+    color: var(--text-primary);
+  }
+
+  .eyebrow {
+    @apply text-[10px] font-bold uppercase tracking-[0.18em];
+    color: var(--brand-primary);
+  }
+
+  .panel {
+    @apply rounded-2xl border;
+    background: var(--surface);
+    border-color: var(--border);
+  }
+
+  .field {
+    @apply min-h-11 w-full min-w-0 rounded-lg border px-3 py-2.5 text-sm;
+    background: var(--surface);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
+
+  .field:focus {
+    border-color: var(--action-edit);
+  }
+
+  .field:disabled {
+    background: var(--surface-soft);
+    color: var(--text-muted);
+    cursor: not-allowed;
+  }
+
+  .field[aria-invalid="true"] {
+    border-color: var(--action-danger);
+  }
+
+  .field::placeholder {
+    color: var(--text-muted);
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-semibold;
+  }
+
+  .link {
+    @apply font-medium underline underline-offset-4;
+    color: var(--action-edit);
+  }
+
+  .action-link {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold;
+    background: var(--action-buy);
+    color: white;
+  }
+
+  .action-link:hover {
+    background: var(--action-buy-hover);
+  }
+
+  .table-cell {
+    @apply border-b px-4 py-3 text-left text-sm;
+    border-color: var(--border);
+  }
+
+  .tab {
+    @apply flex min-h-11 items-center justify-center gap-2 border-b-2 border-transparent px-3 py-2 text-sm font-medium;
+    color: var(--text-secondary);
+  }
+
+  .tab[aria-current="page"],
+  .tab[aria-pressed="true"] {
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+  }
+}

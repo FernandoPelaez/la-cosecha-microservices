@@ -1,0 +1,704 @@
+[
+  {
+    "archivo": "services/history/main.py",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "0222700aacc2f581e69b63430696f4cddcbdcb061ab77f510a0b818747e66463"
+  },
+  {
+    "archivo": "services/returns/refund.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "0ff5ccf91cc2414fd07986b64a62bf8238a4bd22e67040f89c5b277887579a42"
+  },
+  {
+    "archivo": "services/returns/service.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "a23088af79453ac7c531ce87b40bd314a36ab4af51e08f0c811310c2b6a9d19f"
+  },
+  {
+    "archivo": "services/returns/server.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "daa7eced444ee22a2b0869e47d7dac725e2e223a64abac90bf1ce39dbeae4f05"
+  },
+  {
+    "archivo": "services/auth/passwords.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "8100eaf87033ccb1cff8337723c8ed9ffe82269a6e75adf0259dae6cb45f730e"
+  },
+  {
+    "archivo": "services/auth/bot.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "e368241015d0971a1b7c216edf4fe63bf054eb7b5678b380143e9b953089b0bb"
+  },
+  {
+    "archivo": "services/auth/tokens.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "8d341027c75a866bab94e57bc43b7eb5dc416ef35765c45b8793d06d9305c01f"
+  },
+  {
+    "archivo": "services/auth/service.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "6c287d5cbbea5f2ef1a389f3743518de4c932ec764fc5bfe182e7e361ee2a1ce"
+  },
+  {
+    "archivo": "services/auth/repository.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "cbe6529aa022b53da307cad694d21b4f3685bf93434cccda78d873e5701cca3a"
+  },
+  {
+    "archivo": "services/auth/server.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "65cb1ef82673f743d7666bc49c3a2c45b0c224dc9c47b41436b456164602e959"
+  },
+  {
+    "archivo": "services/orders/Program.cs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "691899cc450f0cc01c9607ac13a9c47521589b9c80db4146f4377ad96f93ae8c"
+  },
+  {
+    "archivo": "services/orders/RegistroPedidosService.csproj",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "15930dd1c6d79a03b53bc9ea50d4adbfe3eddfcbf41dec5392b8c956dcd6355d"
+  },
+  {
+    "archivo": "services/suppliers/app.py",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "e9269ce7ac7886d4abf9b2855028fbace77a1e63d9503b772297ca50179f1d3c"
+  },
+  {
+    "archivo": "services/suppliers/validation.py",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "7bfed4df15d4611151a26026adf8042be72f8bec7995b780825654c6a5480655"
+  },
+  {
+    "archivo": "services/python-common/requirements.txt",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "8e49e02efaa4ee05dfed1955419cb03aca8c00b36436878450e3ff2e20867fb5"
+  },
+  {
+    "archivo": "services/python-common/database.py",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "19be7d61f1213d82bf3442d3031f4eeff69aa53630be57963e32e5767204c5aa"
+  },
+  {
+    "archivo": "services/python-common/security.py",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "df4680d4ffd8911b4a48657814feeced7a0e5d7a0cf5635b56ae8a4445f423d0"
+  },
+  {
+    "archivo": "services/python-common/requirements.lock.txt",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "49425ebba496b377afac515a89d16a8610c5bba2ebc51835149be955954692c1"
+  },
+  {
+    "archivo": "services/inventory/schemas.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "0ab26f82efc2825376222c061bbfe5d1140fe4f061783becc4e83f113edea040"
+  },
+  {
+    "archivo": "services/inventory/repository.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "aa7da8b1872b8c183ddfd7f37f925011eda792fc8f875fc4a8e16750dfce1578"
+  },
+  {
+    "archivo": "services/inventory/server.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "afaeae474e38732b565eb1d73da973ab620eb764ed55382eed18f7b0d795bcbc"
+  },
+  {
+    "archivo": "services/reports/repository.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "be20482fe0352b05e7919287d6b03e39ef0c7252d0a30cffb775e7de53e209ea"
+  },
+  {
+    "archivo": "services/reports/server.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "ab674f69bf240749654577e4186af8ac2d4e8cc24fe08b33b1ae7991f44f0c07"
+  },
+  {
+    "archivo": "services/shipping/app.py",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "9bdc1593e0e326ea7b53febca220b80745cc0a4baf6a024354105df2253020bd"
+  },
+  {
+    "archivo": "services/shipping/delivery.py",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "3a77eff6cce48555d0ae391f07b60aecf2ad6e761818058b864b76da3570100f"
+  },
+  {
+    "archivo": "services/packaging/schemas.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "6b7e648254320c62413db40b5bb3a30ec913427087f3fcc606cf810e0dd9ed74"
+  },
+  {
+    "archivo": "services/packaging/server.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "7a0313fe5b0a8bb58e69b5976a6449dfefe499210b65fc831eb1c82aa9f0c8eb"
+  },
+  {
+    "archivo": "services/commerce/cart.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "ef56660ae300ca05f05833bb1b4d3d1dcf8d00eb3206b986774d9babe8130a7b"
+  },
+  {
+    "archivo": "services/commerce/payments.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "376a9527ff4e7d5e98e9c79b07aeb82084c32d4b6efab9c9b890d36657bef4a6"
+  },
+  {
+    "archivo": "services/commerce/checkout.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "71b3c584f8f9042fbecb4b04b5c7839d6487dbd81e43dada828787bb10cc0076"
+  },
+  {
+    "archivo": "services/commerce/outbox.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "4f32edd89afc5b6939e5017157df90876f7e853b85379dc6aba2b062b856c5c3"
+  },
+  {
+    "archivo": "services/commerce/purchases.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "4ff717864b103c14e1193e12daa37b796327f4af8379b48e4b541078184f9a5f"
+  },
+  {
+    "archivo": "services/commerce/receipts.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "2320d49ffd9388bf54af54fad794f853156b3ae636822a4dac2ad4447cc6efe8"
+  },
+  {
+    "archivo": "services/commerce/addresses.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "68371935f05e0c500ba0951ce0e1f890613f9e6ac54058fb82a7b961e0515175"
+  },
+  {
+    "archivo": "services/commerce/processor.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "3d8520ebc59ffbc052eaad3512f68c34fa87fb38c5196906dc783a39db4c31dc"
+  },
+  {
+    "archivo": "services/commerce/server.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "deffc05601a36dfd3ffdfe73d35974c6bb4b5c3394725951a470eb49001523c0"
+  },
+  {
+    "archivo": "services/reviews/server.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "a30657c80f39849d7426f99dd8cf4baf799f713331c760faa880daf83a546595"
+  },
+  {
+    "archivo": "services/returns/domain/capacity.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "55a43362e8356ee13317025ca8844af0478bac29a5308d18125e107a5bc12a93"
+  },
+  {
+    "archivo": "services/returns/domain/validation.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "6197db734224e5a6e0ace017378ac1dce188e78af8bc26ecd27041d6c79f4b0a"
+  },
+  {
+    "archivo": "services/returns/domain/errors.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "0e73addd5bb107d631544dac871be929ab61dfc194dca1e39b7f557751dea2d0"
+  },
+  {
+    "archivo": "services/orders/Controllers/PedidosController.cs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "5b4065d7920fff37ef81800d1a10f3f48da8972751cba76c46f8deb0510e738c"
+  },
+  {
+    "archivo": "services/orders/Services/PedidosService.cs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "5c74a4213f6d2b30dc7549e2591bf59f4454002459b142fbce5de18c00ea9812"
+  },
+  {
+    "archivo": "packages/core/security.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "109a87827c04ea7cc35a4c877135ea7e9fca70c578d988b86e71b787e3ab6096"
+  },
+  {
+    "archivo": "packages/core/http.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "55f63972ec13ef8d39fade474602bece5bbd2f7d19fd37ac7a8eda38ebec8b72"
+  },
+  {
+    "archivo": "packages/core/db.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "f2a080c5c534fdb383cf2209c335b8a9a7739a5795cc741ffa575fc69a2a65e6"
+  },
+  {
+    "archivo": "packages/core/validation.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "5a77caa6e62b20fb5cf5fe3727df943cd38908f3c8192cee0522c7eb54c26b13"
+  },
+  {
+    "archivo": "packages/core/stock.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "bc6e7165e3479e04fe06104056c62e4fa3d5431ee18c3ffd1da4c5ca8e589d9e"
+  },
+  {
+    "archivo": "packages/core/mail.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "44e978a4949847e297140a45dfae5c6455afdf6663904cb53cef89952b307b0f"
+  },
+  {
+    "archivo": "packages/core/money.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "1623ff788bdde648e0ffe68ee945e8d197060e09b871b062663f31e080ab9af9"
+  },
+  {
+    "archivo": "packages/core/errors.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "6ea4da6be63df4c37d98fb790add962802620b28a6159c3778dd964791d5bf9c"
+  },
+  {
+    "archivo": "tests/http.test.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "6f4b665e604bf4132b52c9aee9140197c4c7020f55587fe829fe2e917183e726"
+  },
+  {
+    "archivo": "tests/rules.test.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "db614367cc9305b5d7afd23f61b5daf800a80bdd4caea0fce160dd216a765812"
+  },
+  {
+    "archivo": "tests/outbox.test.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "7b4ecd3e1da1ab11f6af350e0286b1d0dfb773ede269f1311e23043d08b7e619"
+  },
+  {
+    "archivo": "tests/bff.test.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "26e0e5b4d4736776aaa826e4a888d9a6a4d55cde00365a089527c455e495f77b"
+  },
+  {
+    "archivo": "tests/transactions.test.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "4139daa8572a26fda887b15459517c33a42ba2055d631f75bd48d0fd5c8de6b8"
+  },
+  {
+    "archivo": "tests/security.test.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "10e84de939038452cf439215d2cffc826a56a722b34e830b55853e8f168f2da8"
+  },
+  {
+    "archivo": "tests/e2e/services.test.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "8796731cab8777d404f933c4ac474ae49369d0182d89803fc43bdbc02067e646"
+  },
+  {
+    "archivo": "tests/integration/mysql.test.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "5af97c9dce9137211d552aea84a71a83e8167c0403983d7ba388d426b5b9a6ca"
+  },
+  {
+    "archivo": "tests/python/test_rules.py",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "69e38277f76618a9428c616961adaddf46a45cfeb1b3c845215f46dfba55c821"
+  },
+  {
+    "archivo": "tests/python/test_service_errors.py",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "23352950bc70ed558b38becf6758409ee2b5f6df987ef1218aeeacf2248581d1"
+  },
+  {
+    "archivo": "apps/web/src/features/products/use-product.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "dabaf3e5cbacc3eb74c0840b3fa57a71d29612b8316dc74d937aaf4acc347cb0"
+  },
+  {
+    "archivo": "apps/web/src/features/products/detail.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "f37f31a6e69ea6e1479b8501c6dedcc1036cfd29070b50c6c43a3277c5fe4cb7"
+  },
+  {
+    "archivo": "apps/web/src/features/products/product-card.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "c9289e935c133a0a25fcb03a1c7d61e698d152fe08b3c878e529e8c6ba5f30e5"
+  },
+  {
+    "archivo": "apps/web/src/features/products/catalog.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "0d90d7bef2797f2490876dfc4e5024107f45117bc2d1d2e156fc2363f921f755"
+  },
+  {
+    "archivo": "apps/web/src/features/products/product-reviews.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "e3257264d7d62640f7e45c0acffecb644c59a7e8e7dd450d8a421a0fa6623a93"
+  },
+  {
+    "archivo": "apps/web/src/features/products/product-content.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "e472b0401ea16c591f9036a3fad2fb7106c30a87099979aacf4e72451d6a5579"
+  },
+  {
+    "archivo": "apps/web/src/features/auth/turnstile.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "216a00cf6fa697d664297aeab8f05a6666b46ef977fbe14fc256d20eccfb01fe"
+  },
+  {
+    "archivo": "apps/web/src/features/auth/use-auth-form.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "11ad4152f873b4595b336c2073f042770142b4d93986c33a06e0b1de5fd9c2e3"
+  },
+  {
+    "archivo": "apps/web/src/features/auth/auth-field.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "a6a565212738e87a5d5c8ce6b53b8922ffe6e0afcf5a9bb2bbb43224faedb8bd"
+  },
+  {
+    "archivo": "apps/web/src/features/auth/auth-form.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "8d51ccd57779865f141bc91c9c958e7e2aa0d47188c295d4bf63b1886d216503"
+  },
+  {
+    "archivo": "apps/web/src/features/cart/cart-page.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "10724257d03df851b1c1fccb4e29d95b80dca5d98050b8940ac3badb3b225f14"
+  },
+  {
+    "archivo": "apps/web/src/features/cart/use-cart.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "4d31e7cabe595ba190a2ccd9533f3dae2e476be9966a984128b51bde76d4de65"
+  },
+  {
+    "archivo": "apps/web/src/features/checkout/result.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "6a3cd249e373fcb0dfb92f11accc7ea7df79af1525f7796bc3020883ffe14120"
+  },
+  {
+    "archivo": "apps/web/src/features/checkout/checkout-page.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "18d0025051fa79720a9282f2bde6a1d99c4ed9097f453436d6bc75e770c81bda"
+  },
+  {
+    "archivo": "apps/web/src/features/account/types.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "03e60627de842db306f5243083da9eec43e728d5627b40787aea02b0b5035dd5"
+  },
+  {
+    "archivo": "apps/web/src/features/account/order-list.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "b7d5e4dcc16f5f63f38c23fa8b7d78d8436e45f55bdddaf5da1dbf42dfa41287"
+  },
+  {
+    "archivo": "apps/web/src/features/account/verification-notice.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "19b954ba3292f3249597daf8504defdd8cc936a7a95523b1087eb3b2844d0f9a"
+  },
+  {
+    "archivo": "apps/web/src/features/account/address-list.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "9e0a304b5f6cc876a64ba2031a5ad4ea5c1626214d10ba6de30e0c70c52b1cf5"
+  },
+  {
+    "archivo": "apps/web/src/features/account/address-form.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "b5c5971c836d31ae8dfdb3d676c5509886a4448d8de8f9a81c2b7f084e64ac29"
+  },
+  {
+    "archivo": "apps/web/src/features/account/request-form.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "a4c714520be545a7056206e95559fa770897160caa3a1784cb09937a0dae1bda"
+  },
+  {
+    "archivo": "apps/web/src/features/account/account.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "88c5df9d03f1bc058a540e07233e497f35dc8309f28628ab391361f7947afe5a"
+  },
+  {
+    "archivo": "apps/web/src/features/account/reviews.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "14293ff30256250f8f24d6694de85e548cfb96fdc776950b2a7591a6e7ffba7c"
+  },
+  {
+    "archivo": "apps/web/src/features/admin/types.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "cf0bcc46650a9473788f5ab91ad81eb2f10a6061ec2810aa158fcfa4743119cf"
+  },
+  {
+    "archivo": "apps/web/src/features/admin/resource.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "d2ff6643b91e649ea774ba8d740fbaaf766e869dd27173c7276111cfeabd2df1"
+  },
+  {
+    "archivo": "apps/web/src/features/admin/nav.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "3bdc4a60522f146eb6ef8a749e9b4ec0a3154dd1adb1fc89f62abf977aa313ab"
+  },
+  {
+    "archivo": "apps/web/src/features/admin/item-lines.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "351f9978d7d548666a9bad994a29cfca7a9295de169a6789297563d5b9051838"
+  },
+  {
+    "archivo": "apps/web/src/features/admin/record-form.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "b13cb7ec1157d4111b64537827d7bb3caa3c905d341af47465fe220f1d236d6d"
+  },
+  {
+    "archivo": "apps/web/src/features/admin/dashboard.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "f4a957230a8ae0771d97298c6d206ecbb29c724f4cb778d8816e8c250ca3986e"
+  },
+  {
+    "archivo": "apps/web/src/features/admin/reports.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "4aeb511e6490baf9bf79ba4723d14e9d7590c90d81c93f08779303b8edd78b9a"
+  },
+  {
+    "archivo": "apps/web/src/features/admin/config/index.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "a7ebd959cad41968b7bff3957b9d2c89d3ac176affc7c36818258b10e4e8e61a"
+  },
+  {
+    "archivo": "apps/web/src/features/admin/config/operations.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "fdb44526af77f0d0409a2949d7761a04f6b1aac9669142f58b0f145dd1ef145f"
+  },
+  {
+    "archivo": "apps/web/src/features/admin/config/catalog.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "bb595ef12f14ce37b55a9c7f62e5dffde25db8eeaf7d1eeb96f03498984f0e46"
+  },
+  {
+    "archivo": "apps/web/src/features/admin/config/purchases.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "878f13aca9d3294080465cd2850133f32e34b311b6bbd45476da9e4fdc62c0a1"
+  },
+  {
+    "archivo": "apps/web/src/types/index.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "ecff39d11e1c10280843aaa7dcd4f685d1c891a950fec09f9c84c8a90a617582"
+  },
+  {
+    "archivo": "apps/web/src/lib/api.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "73355f8e0e0a5dba592f1eaf960ee766501f04cb672112ed8440c1ed36ee4ea5"
+  },
+  {
+    "archivo": "apps/web/src/lib/server-auth.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "50c3475895b37da5505937273535a44c82cf020aa1fab83798803696009e63bc"
+  },
+  {
+    "archivo": "apps/web/src/lib/dates.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "c4ab4c03cbf8b084a791d1d413940fb694be67041cd5240648e95198b7b4d09e"
+  },
+  {
+    "archivo": "apps/web/src/components/ui/quantity.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "26b055ced1e8ed054bf0fe5a5e9a3136f3b4c9717d77310cc0ef88c83d8265f9"
+  },
+  {
+    "archivo": "apps/web/src/components/ui/feedback.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "6a1f7c7beba331013031596c7f484c80946a46807088fa89156a4b36dcc48796"
+  },
+  {
+    "archivo": "apps/web/src/components/ui/popover.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "6fd0c0717599a7b7df3db0160b2c77d66b8a0bfeb0ec0a1ec7fb92bde5523d09"
+  },
+  {
+    "archivo": "apps/web/src/components/ui/dialog.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "b1f82109d9c362162590b175f487e3e59809418b831ef55233908cad205c3bfa"
+  },
+  {
+    "archivo": "apps/web/src/components/ui/reveal.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "5cbe54f6789ab8fd34b9caf87ccb5bbcfb4c08d811361476903916ca7fbc33f8"
+  },
+  {
+    "archivo": "apps/web/src/components/ui/intro-sequence.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "0220b653eb1e408e970e87db2e707e92339da78a92e0280a61f9307751e28a4c"
+  },
+  {
+    "archivo": "apps/web/src/components/ui/button.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "b22ee71aa549a543d2e14acda2f9d47b6dd34bcd578719abf01d63b70751e580"
+  },
+  {
+    "archivo": "apps/web/src/components/providers.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "f47b6bacd3a4accd793d8463782b46399f60eadebb6a21c88cdfa1a9dab9fd5f"
+  },
+  {
+    "archivo": "apps/web/src/components/layout/brand-intro.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "c831ca5dfaefc7ac68617bc28f619a21bcc1cf20a7690bda7e7ebdeab758b1b8"
+  },
+  {
+    "archivo": "apps/web/src/components/layout/announcement-bar.tsx",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "c6072c554d9f7161023bc6870e44f95f07cf93b098aaa1635cd0890891a27ac6"
+  },
+  {
+    "archivo": "apps/web/tsconfig.json",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "65e13985dfef97d257a4e1a265b3530d9a81e24b851ee2e51ffb05f96ba91232"
+  },
+  {
+    "archivo": "apps/web/postcss.config.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "fceeb3ebdb79f502ecbe61c1f949e312d66d0cc716ea775c062174f9ba82bf43"
+  },
+  {
+    "archivo": "apps/web/next-env.d.ts",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "0f70629890b72a0a82e91972cc032c04b658b26c265373cb711cf576bfbf8fcc"
+  },
+  {
+    "archivo": "tsconfig.services.json",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "2cb3425cc18c6f338409a710574457abe7692f082743615345e000b9e2ffcf94"
+  },
+  {
+    "archivo": "eslint.config.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "5aa55740bd733b0049c078ddc7dfb3e992423cac06c0713589ece10a83f42be1"
+  },
+  {
+    "archivo": "global.json",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "b48d6da8fa62c0da7cc8a2da4ea036ac55836660a448ba533135abb5b8451b73"
+  },
+  {
+    "archivo": "scripts/configure.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "25f9b94ac47948cc6265d55280d4be6b5aa1883e517b098ac375bec80d7b9a23"
+  },
+  {
+    "archivo": "scripts/create-admin.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "46aa7a884aee1dd3a5e2aec792b0429b4ec816800ba8c8e99d9ff723b4274729"
+  },
+  {
+    "archivo": "scripts/deliver-receipts.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "4fd5bff8189b0c434c30098b0271c1ff87dbedef90ce5a35957770b38b9ab23e"
+  },
+  {
+    "archivo": "scripts/reconcile-payments.mjs",
+    "fuente": "FernandoPelaez/la-cosecha",
+    "commit": "59723f1aa7ffa5060f51e35babf348ddcb9173a2",
+    "sha256_origen": "af0af76dd5cda58eb1e5d5ecafd64a8db43f405559e303d3b029adceac93b0e2"
+  }
+]
