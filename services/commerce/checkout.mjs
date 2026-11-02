@@ -40,6 +40,22 @@ export async function createOrder(user, input) {
   );
 
   return transaction(async (c) => {
+    // Coordinar la creación del pedido con el cierre de la cuenta.
+    const [account] = await query(
+      `SELECT estado
+       FROM usuarios
+       WHERE id = ?
+       FOR UPDATE`,
+      [user.id],
+      c,
+    );
+
+    ensure(
+      account?.estado === "activo",
+      401,
+      "Tu cuenta ya no está activa.",
+    );
+
     const cartId = await openCart(c, user.clienteId);
 
     const [existing] = await query(
@@ -222,7 +238,11 @@ export async function paymentLink(user, orderId) {
 
     ensure(order, 404, "Pedido no encontrado");
 
-    ensure(order.estado === "pendiente", 409, "Este pedido ya no admite pagos");
+    ensure(
+      order.estado === "pendiente",
+      409,
+      "Este pedido ya no admite pagos",
+    );
 
     ensure(user.correo_verificado, 403, "Confirma tu correo antes de comprar");
 
@@ -270,6 +290,7 @@ export async function paymentLink(user, orderId) {
     ensure(items.length > 0, 409, "El pedido no contiene productos");
 
     const reservationExpiry = order.vence_reserva;
+
     const expirationTime =
       reservationExpiry instanceof Date
         ? reservationExpiry.getTime()
@@ -333,3 +354,4 @@ export async function paymentLink(user, orderId) {
     };
   });
 }
+

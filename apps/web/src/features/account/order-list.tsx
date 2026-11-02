@@ -1,20 +1,44 @@
 "use client";
+
 import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
-import { FileDown, Mail, Package, ArrowUpRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { useMemo, useState } from "react";
+import { Package } from "lucide-react";
 import { useFeedback } from "@/components/ui/feedback";
-import { money, send } from "@/lib/api";
+import { send } from "@/lib/api";
+import { OrderFilters } from "./order-filters";
+import { OrderTable } from "./order-table";
+import { OrderPagination } from "./order-pagination";
+import { OrderDetailDialog } from "./order-detail-dialog";
 import type { Order } from "./types";
-const PAGE_SIZE = 5;
-function date(value: string) {
+
+const PAGE_SIZE = 4;
+
+const STATUS_LABELS: Record<string, string> = {
+  pendiente: "Pendiente",
+  confirmado: "Confirmado",
+  pagado: "Pagado",
+  preparacion: "En preparación",
+  enviado: "Enviado",
+  entregado: "Entregado",
+  cancelado: "Cancelado",
+};
+
+type OrderAction = "payment" | "email" | "cancel" | null;
+
+interface OrderListProps {
+  orders: Order[];
+  onRefresh?: () => void;
+}
+
+function formatOrderDate(value: string) {
   const normalized = value.replace(" ", "T");
+
   const parsed = new Date(
-    /[Zz]|[+-]\d\d:\d\d$/.test(normalized) ? normalized : normalized + "Z",
+    /[Zz]|[+-]\d\d:\d\d$/.test(normalized)
+      ? normalized
+      : normalized + "Z",
   );
+
   return Number.isNaN(parsed.getTime())
     ? value
     : new Intl.DateTimeFormat("es-MX", {
@@ -22,318 +46,246 @@ function date(value: string) {
         timeStyle: "short",
       }).format(parsed);
 }
+
 export function OrderList({
   orders,
   onRefresh,
-}: {
-  orders: Order[];
-  onRefresh?: () => void;
-}) {
+}: OrderListProps) {
   const { notify, confirm } = useFeedback();
-  const [page, setPage] = useState(1),
-    [selected, setSelected] = useState<number | null>(null),
-    [busy, setBusy] = useState<"payment" | "email" | "cancel" | null>(null);
-  const pages = Math.max(1, Math.ceil(orders.length / PAGE_SIZE)),
-    current = Math.min(page, pages);
-  const order = orders.find((o) => o.id_pedido === selected);
+
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("all");
+  const [selected, setSelected] = useState<number | null>(null);
+  const [busy, setBusy] = useState<OrderAction>(null);
+
+  const statuses = useMemo(
+    () => [...new Set(orders.map((order) => order.estado))],
+    [orders],
+  );
+
+  // Filtra los pedidos por estado, número, folio o producto.
+  const filteredOrders = useMemo(() => {
+    const normalizedSearch = search
+      .trim()
+      .toLocaleLowerCase("es-MX");
+
+    return orders.filter((order) => {
+      const matchesStatus =
+        status === "all" || order.estado === status;
+
+      const matchesSearch =
+        !normalizedSearch ||
+        String(order.id_pedido).includes(normalizedSearch) ||
+        (order.folio || "")
+          .toLocaleLowerCase("es-MX")
+          .includes(normalizedSearch) ||
+        order.items.some((item) =>
+          item.nombre
+            .toLocaleLowerCase("es-MX")
+            .includes(normalizedSearch),
+        );
+
+      return matchesStatus && matchesSearch;
+    });
+  }, [orders, search, status]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredOrders.length / PAGE_SIZE),
+  );
+
+  const currentPage = Math.min(page, totalPages);
+  const start = (currentPage - 1) * PAGE_SIZE;
+
+  const visibleOrders = filteredOrders.slice(
+    start,
+    start + PAGE_SIZE,
+  );
+
+  const selectedOrder = orders.find(
+    (order) => order.id_pedido === selected,
+  );
+
+  function handleSearchChange(value: string) {
+    setSearch(value);
+    setPage(1);
+  }
+
+  function handleStatusChange(value: string) {
+    setStatus(value);
+    setPage(1);
+  }
+
   async function pay(id: number) {
     if (busy) return;
+
     setBusy("payment");
+
     try {
-      const result = await send<{ url: string }>(`retry-payment/${id}`, "POST"),
-        url = new URL(result.url);
-      if (url.protocol !== "https:" || url.hostname !== "checkout.stripe.com")
+      const result = await send<{ url: string }>(
+        `retry-payment/${id}`,
+        "POST",
+      );
+
+      const url = new URL(result.url);
+
+      if (
+        url.protocol !== "https:" ||
+        url.hostname !== "checkout.stripe.com"
+      ) {
         throw new Error("Enlace de pago inválido");
+      }
+
       window.location.assign(url.href);
-    } catch (e) {
-      notify((e as Error).message, true);
+    } catch (error) {
+      notify((error as Error).message, true);
       setBusy(null);
     }
   }
+
   async function email(id: number) {
     if (busy) return;
+
     setBusy("email");
+
     try {
       await send(`receipts/${id}/email`, "POST");
+
       notify(
         "El servidor de correo aceptó el comprobante. Revisa también correo no deseado.",
       );
-    } catch (e) {
-      notify((e as Error).message, true);
+    } catch (error) {
+      notify((error as Error).message, true);
     } finally {
       setBusy(null);
     }
   }
+
   async function cancel(id: number) {
+    // Personaliza únicamente la confirmación de cancelar pedidos.
+    // Las demás confirmaciones conservan sus estilos originales.
     if (
       busy ||
       !(await confirm(
         "Cancelar pedido",
         "Se consultará el estado del pago antes de liberar la reserva.",
         "delete",
+        {
+          cancelLabel: "Volver",
+          confirmLabel: "Sí, cancelar pedido",
+          neutralCancel: true,
+        },
       ))
-    )
+    ) {
       return;
+    }
+
     setBusy("cancel");
+
     try {
       await send(`cancel-order/${id}`, "POST");
+
       notify("Pedido cancelado");
       setSelected(null);
       onRefresh?.();
-    } catch (e) {
-      notify((e as Error).message, true);
+    } catch (error) {
+      notify((error as Error).message, true);
       onRefresh?.();
     } finally {
       setBusy(null);
     }
   }
-  if (!orders.length)
+
+  if (!orders.length) {
     return (
       <div className="panel p-10 text-center">
-        <Package size={32} className="mx-auto text-(--brand-olive) mb-4" />
-        <h2 className="font-display text-2xl">Todavía no tienes pedidos</h2>
+        <Package
+          size={32}
+          className="mx-auto mb-4 text-(--brand-olive)"
+          aria-hidden="true"
+        />
+
+        <h2 className="font-display text-2xl">
+          Todavía no tienes pedidos
+        </h2>
+
         <p className="mt-3 mb-6 text-sm text-(--text-secondary)">
           Aquí encontrarás tus compras, comprobantes y seguimiento.
         </p>
+
         <Link href="/#salsas" className="action-link">
           Elegir mis salsas
         </Link>
       </div>
     );
+  }
+
   return (
-    <section aria-label="Historial de pedidos">
-      <div className="flex flex-wrap justify-between items-end gap-3 mb-5">
-        <div>
-          <h2 className="font-display text-2xl">Historial de pedidos</h2>
-          <p className="text-xs text-(--text-secondary) mt-2">
-            Tus compras más recientes y sus comprobantes.
-          </p>
+    <section
+      aria-label="Historial de pedidos"
+      className="min-w-0"
+    >
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 items-start gap-4">
+          <Package
+            size={34}
+            strokeWidth={1.7}
+            aria-hidden="true"
+            className="mt-1 shrink-0 text-(--brand-secondary)"
+          />
+
+          <div className="min-w-0">
+            <h2 className="font-display text-2xl sm:text-3xl">
+              Historial de pedidos
+            </h2>
+
+            <p className="mt-2 text-sm text-(--text-secondary)">
+              Consulta, filtra y da seguimiento a todas tus compras.
+            </p>
+          </div>
         </div>
-        <span className="text-xs">{orders.length} pedidos</span>
+
+        <span className="shrink-0 text-sm font-semibold text-(--brand-secondary)">
+          {orders.length}{" "}
+          {orders.length === 1 ? "pedido" : "pedidos"}
+        </span>
+      </header>
+
+      <OrderFilters
+        search={search}
+        status={status}
+        statuses={statuses}
+        statusLabels={STATUS_LABELS}
+        onSearchChange={handleSearchChange}
+        onStatusChange={handleStatusChange}
+      />
+
+      <div className="overflow-hidden rounded-2xl border border-(--border) bg-(--surface)">
+        <OrderTable
+          orders={visibleOrders}
+          formatDate={formatOrderDate}
+          onViewOrder={setSelected}
+        />
+
+        <OrderPagination
+          currentPage={currentPage}
+          totalItems={filteredOrders.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage}
+        />
       </div>
-      <div className="space-y-3">
-        {orders
-          .slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE)
-          .map((o) => (
-            <article key={o.id_pedido} className="panel p-4 sm:p-5">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h3 className="font-display text-xl">
-                    Pedido #{o.id_pedido}
-                  </h3>
-                  <p className="text-[11px] mt-1 text-(--text-secondary)">
-                    {date(o.fecha)}
-                    {o.folio ? ` · ${o.folio}` : ""}
-                  </p>
-                </div>
-                <StatusBadge state={o.estado} />
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-4 mt-4 border-t border-(--border) pt-4">
-                <div className="flex items-center gap-2">
-                  {o.items.slice(0, 3).map((item) => (
-                    <Image
-                      key={item.id_producto}
-                      src={item.imagen || "/logo/la-cosecha.png"}
-                      alt={item.nombre}
-                      width={45}
-                      height={52}
-                      className="object-contain rounded bg-(--surface-soft) h-13"
-                    />
-                  ))}
-                  <span className="text-xs ml-2">
-                    {o.items.reduce((s, i) => s + i.cantidad, 0)} unidades
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <strong className="text-base">{money(o.total)}</strong>
-                  <Button
-                    size="compact"
-                    aria-haspopup="dialog"
-                    onClick={() => setSelected(o.id_pedido)}
-                  >
-                    Ver pedido
-                    <ArrowUpRight size={14} />
-                  </Button>
-                </div>
-              </div>
-            </article>
-          ))}
-      </div>
-      {pages > 1 && (
-        <nav
-          aria-label="Paginación de pedidos"
-          className="flex flex-wrap items-center justify-between gap-3 mt-5"
-        >
-          <span className="text-xs" aria-live="polite">
-            Página {current} de {pages}
-          </span>
-          <div className="flex gap-2">
-            <Button
-              size="compact"
-              disabled={current === 1}
-              onClick={() => setPage(current - 1)}
-            >
-              Anterior
-            </Button>
-            <Button
-              size="compact"
-              disabled={current === pages}
-              onClick={() => setPage(current + 1)}
-            >
-              Siguiente
-            </Button>
-          </div>
-        </nav>
-      )}
-      {order && (
-        <Dialog
-          wide
-          title={`Pedido #${order.id_pedido}`}
+
+      {selectedOrder && (
+        <OrderDetailDialog
+          order={selectedOrder}
+          busy={busy}
+          formatDate={formatOrderDate}
           onClose={() => setSelected(null)}
-        >
-          <div className="p-5 sm:p-7">
-            <div className="flex flex-wrap items-center gap-3 justify-between border-b border-(--border) pb-4">
-              <div>
-                <h3 className="font-display text-2xl">Tu compra, en detalle</h3>
-                <p className="text-xs mt-2 text-(--text-secondary)">
-                  {date(order.fecha)} ·{" "}
-                  {order.folio || `Pedido #${order.id_pedido}`}
-                </p>
-              </div>
-              <StatusBadge state={order.estado} />
-            </div>
-            <div className="divide-y divide-(--border)">
-              {order.items.map((item) => (
-                <div
-                  key={item.id_producto}
-                  className="flex items-center gap-4 py-4"
-                >
-                  <Image
-                    src={item.imagen || "/logo/la-cosecha.png"}
-                    alt={item.nombre}
-                    width={65}
-                    height={75}
-                    className="object-contain w-14 h-18 shrink-0"
-                  />
-                  <div className="min-w-0 grow">
-                    <p className="text-sm font-semibold">{item.nombre}</p>
-                    <p className="text-xs mt-1 text-(--text-secondary)">
-                      {item.cantidad} ×{" "}
-                      {money(
-                        Number(item.precio_unitario) -
-                          Number(item.descuento_unitario),
-                      )}
-                    </p>
-                    {Number(item.descuento_unitario) > 0 && (
-                      <p className="text-xs mt-1 text-(--brand-olive)">
-                        Descuento por unidad: {money(item.descuento_unitario)}
-                      </p>
-                    )}
-                  </div>
-                  <strong className="text-sm">
-                    {money(
-                      (Number(item.precio_unitario) -
-                        Number(item.descuento_unitario)) *
-                        item.cantidad,
-                    )}
-                  </strong>
-                </div>
-              ))}
-            </div>
-            <div className="border-y border-(--border) py-4 flex justify-between">
-              <span>Total · MXN</span>
-              <strong>{money(order.total)}</strong>
-            </div>
-            {order.estado_pago && (
-              <div className="mt-4 flex gap-2 items-center text-xs">
-                Pago
-                <StatusBadge state={order.estado_pago} />
-              </div>
-            )}
-            {Number(order.total_reembolsado) > 0 && (
-              <p className="mt-3 text-sm text-purple-800">
-                Reembolsado: {money(order.total_reembolsado || 0)}
-              </p>
-            )}
-            {order.domicilio_snapshot && (
-              <section className="mt-5">
-                <h4 className="text-sm font-semibold">
-                  Domicilio registrado en la compra
-                </h4>
-                <p className="text-sm text-(--text-secondary) mt-2">
-                  {order.domicilio_snapshot.calle_numero},{" "}
-                  {order.domicilio_snapshot.colonia}
-                  <br />
-                  {order.domicilio_snapshot.ciudad}, C.P.{" "}
-                  {order.domicilio_snapshot.codigo_postal}
-                </p>
-              </section>
-            )}
-            {order.estado_envio && (
-              <section className="mt-5">
-                <h4 className="text-sm font-semibold mb-2">Seguimiento</h4>
-                <StatusBadge state={order.estado_envio} />
-                {order.num_guia && (
-                  <p className="text-sm mt-3">
-                    {order.paqueteria} · Guía {order.num_guia}
-                  </p>
-                )}
-                {order.fecha_envio && (
-                  <p className="text-xs mt-2">
-                    Salida: {date(order.fecha_envio)}
-                  </p>
-                )}
-                {order.fecha_entrega_real && (
-                  <p className="text-xs mt-2">
-                    Entrega registrada: {date(order.fecha_entrega_real)}
-                  </p>
-                )}
-              </section>
-            )}
-            <div className="mt-6 flex flex-wrap gap-3">
-              {order.estado === "pendiente" && (
-                <Button
-                  variant="buy"
-                  busy={busy === "payment"}
-                  disabled={busy !== null}
-                  onClick={() => void pay(order.id_pedido)}
-                >
-                  Continuar al pago
-                </Button>
-              )}
-              {order.estado === "pendiente" && (
-                <Button
-                  variant="cancel"
-                  busy={busy === "cancel"}
-                  disabled={busy !== null}
-                  onClick={() => void cancel(order.id_pedido)}
-                >
-                  Cancelar pedido
-                </Button>
-              )}
-              {order.id_venta && (
-                <>
-                  <a
-                    href={`/api/receipts/${order.id_venta}/pdf`}
-                    className="action-link"
-                  >
-                    <FileDown size={16} />
-                    Comprobante PDF
-                  </a>
-                  <Button
-                    variant="send"
-                    busy={busy === "email"}
-                    disabled={busy !== null}
-                    onClick={() => void email(order.id_venta!)}
-                  >
-                    <Mail size={16} />
-                    Enviar por correo
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </Dialog>
+          onPay={(id) => void pay(id)}
+          onCancel={(id) => void cancel(id)}
+          onEmail={(id) => void email(id)}
+        />
       )}
     </section>
   );

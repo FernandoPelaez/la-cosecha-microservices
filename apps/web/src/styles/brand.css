@@ -3,6 +3,7 @@
     "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --font-sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
+
 :root {
   color-scheme: light;
   --brand-primary: #a21e16;
@@ -27,10 +28,12 @@
   --border: #dddccd;
   --border-strong: #b7bba8;
 }
+
 html {
   color-scheme: light;
   scrollbar-gutter: stable;
 }
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -39,9 +42,11 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+
 * {
   box-sizing: border-box;
 }
+
 button,
 a,
 input,
@@ -49,10 +54,13 @@ select,
 textarea {
   -webkit-tap-highlight-color: transparent;
 }
+
 button:not(:disabled),
 select {
   cursor: pointer;
 }
+
+
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -61,36 +69,50 @@ textarea:focus-visible {
   outline: 2px solid var(--action-edit);
   outline-offset: 3px;
 }
+
+input.field:focus-visible {
+  outline: none;
+}
+
+
 input[type="radio"],
 input[type="checkbox"] {
   accent-color: var(--action-buy);
 }
+
 input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance: none;
 }
+
 ::selection {
   background: #f0d8c8;
   color: #671a14;
 }
+
 dialog::backdrop {
   background: #192b24a6;
 }
+
 .shell {
   width: min(1440px, calc(100% - 80px));
   margin-inline: auto;
 }
+
 @media (min-width: 1600px) {
   .shell {
     width: min(1600px, calc(100% - 160px));
   }
 }
+
 @media (max-width: 1150px) {
   .shell {
     width: calc(100% - 48px);
   }
 }
+
 @media (max-width: 600px) {
   .shell {
     width: calc(100% - 32px);
   }
 }
+

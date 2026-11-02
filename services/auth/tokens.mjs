@@ -4,10 +4,14 @@ import { digest } from "../../packages/core/security.mjs";
 import { ensure } from "../../packages/core/errors.mjs";
 import { sendMail } from "../../packages/core/mail.mjs";
 import { generarHash } from "./passwords.mjs";
+import { buildResetEmail } from "./reset-email.mjs";
+
 export async function issueToken(user, kind) {
   const token = randomBytes(32).toString("hex");
+
   await transaction(async (c) => {
     await query("SELECT id FROM usuarios WHERE id=? FOR UPDATE", [user.id], c);
+
     if (kind === "reset") {
       await query(
         "UPDATE tokens_recuperacion SET usado=TRUE WHERE id_usuario=?",
@@ -15,7 +19,7 @@ export async function issueToken(user, kind) {
         c,
       );
       await query(
-        "INSERT INTO tokens_recuperacion(id_usuario,token,fecha_expiracion) VALUES (?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 30 MINUTE))",
+        "INSERT INTO tokens_recuperacion(id_usuario,token,fecha_expiracion) VALUES (?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 5 MINUTE))",
         [user.id, digest(token)],
         c,
       );
@@ -32,15 +36,28 @@ export async function issueToken(user, kind) {
       );
     }
   });
+
   const path = kind === "reset" ? "restablecer" : "verificar";
-  await sendMail(
-    user.correo,
-    kind === "reset"
-      ? "Restablece tu contraseña — LA COSECHA"
-      : "Confirma tu correo — LA COSECHA",
-    `${process.env.APP_URL}/${path}?token=${token}\nEl enlace vence en 30 minutos. Si no lo solicitaste, ignóralo.`,
-  );
+  const url = `${process.env.APP_URL}/${path}?token=${token}`;
+
+  if (kind === "reset") {
+    const { text, html, attachments } = buildResetEmail(url);
+    await sendMail(
+      user.correo,
+      "Restablece tu contraseña — LA COSECHA",
+      text,
+      attachments,
+      html,
+    );
+  } else {
+    await sendMail(
+      user.correo,
+      "Confirma tu correo — LA COSECHA",
+      `${url}\nEl enlace vence en 30 minutos. Si no lo solicitaste, ignóralo.`,
+    );
+  }
 }
+
 export async function consumeToken(token, password) {
   return transaction(async (c) => {
     if (password) {
@@ -50,6 +67,7 @@ export async function consumeToken(token, password) {
         c,
       );
       ensure(t, 422, "El enlace es inválido o ya venció");
+
       await query(
         "UPDATE usuarios SET password_hash=?,version_sesion=version_sesion+1,intentos_fallidos=0,bloqueado_hasta=NULL WHERE id=?",
         [await generarHash(password), t.id_usuario],
@@ -67,6 +85,7 @@ export async function consumeToken(token, password) {
         c,
       );
       ensure(t, 422, "El enlace es inválido o ya venció");
+
       await query(
         "UPDATE usuarios SET correo_verificado=TRUE WHERE id=?",
         [t.id_usuario],
@@ -81,3 +100,4 @@ export async function consumeToken(token, password) {
     return { completed: true };
   });
 }
+

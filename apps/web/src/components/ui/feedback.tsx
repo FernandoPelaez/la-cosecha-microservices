@@ -21,21 +21,32 @@ type Notice = {
   error: boolean;
 };
 
+// Permite personalizar una confirmación sin afectar las demás.
+type ConfirmationOptions = {
+  cancelLabel?: string;
+  confirmLabel?: string;
+  neutralCancel?: boolean;
+};
+
 type Confirmation = {
   title: string;
   message: string;
   kind: "delete" | "success";
+  options?: ConfirmationOptions;
   resolve: (value: boolean) => void;
 };
 
-const Context = createContext<{
+type FeedbackContextValue = {
   notify: (text: string, error?: boolean) => void;
   confirm: (
     title: string,
     message: string,
     kind?: "delete" | "success",
+    options?: ConfirmationOptions,
   ) => Promise<boolean>;
-}>({
+};
+
+const Context = createContext<FeedbackContextValue>({
   notify: () => {},
   confirm: async () => false,
 });
@@ -51,14 +62,31 @@ function ConfirmationDialog({
 }) {
   const accepted = useRef(false);
 
+  const cancelLabel = value.options?.cancelLabel ?? "Cancelar";
+
+  const confirmLabel =
+    value.options?.confirmLabel ??
+    (value.kind === "success" ? "Entendido" : "Eliminar");
+
   return (
-    <Dialog title={value.title} onClose={() => close(accepted.current)}>
+    <Dialog
+      title={value.title}
+      onClose={() => close(accepted.current)}
+    >
       {(dismiss) => (
         <div className="p-5 sm:p-6">
           {value.kind === "success" ? (
-            <CheckCircle2 size={30} className="text-(--action-buy)" />
+            <CheckCircle2
+              size={30}
+              className="text-(--action-buy)"
+              aria-hidden="true"
+            />
           ) : (
-            <Trash2 size={28} className="text-(--action-danger)" />
+            <Trash2
+              size={28}
+              className="text-(--action-danger)"
+              aria-hidden="true"
+            />
           )}
 
           <p className="my-4 text-sm leading-6 text-(--text-secondary)">
@@ -67,19 +95,33 @@ function ConfirmationDialog({
 
           <div className="flex flex-wrap justify-end gap-2">
             {value.kind === "delete" && (
-              <Button variant="cancel" onClick={dismiss}>
-                Cancelar
-              </Button>
+              <>
+                {value.options?.neutralCancel ? (
+                  <button
+                    type="button"
+                    onClick={dismiss}
+                    className="inline-flex min-h-10 items-center justify-center rounded-lg border border-(--border) bg-(--surface) px-4 py-2 text-sm font-semibold text-(--text-primary) hover:bg-(--surface-soft) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brand-secondary)"
+                  >
+                    {cancelLabel}
+                  </button>
+                ) : (
+                  <Button variant="cancel" onClick={dismiss}>
+                    {cancelLabel}
+                  </Button>
+                )}
+              </>
             )}
 
             <Button
-              variant={value.kind === "success" ? "save" : "delete"}
+              variant={
+                value.kind === "success" ? "save" : "delete"
+              }
               onClick={() => {
                 accepted.current = true;
                 dismiss();
               }}
             >
-              {value.kind === "success" ? "Entendido" : "Eliminar"}
+              {confirmLabel}
             </Button>
           </div>
         </div>
@@ -88,7 +130,13 @@ function ConfirmationDialog({
   );
 }
 
-function Toast({ value, remove }: { value: Notice; remove: () => void }) {
+function Toast({
+  value,
+  remove,
+}: {
+  value: Notice;
+  remove: () => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const ending = useRef(false);
 
@@ -102,7 +150,6 @@ function Toast({ value, remove }: { value: Notice; remove: () => void }) {
       ending.current = false;
 
       // El portal utiliza document.body como destino estable.
-      // El popover se muestra en la capa superior del navegador.
       if (!element.matches(":popover-open")) {
         element.showPopover?.();
       }
@@ -144,7 +191,10 @@ function Toast({ value, remove }: { value: Notice; remove: () => void }) {
       return () => {
         timer.kill();
 
-        if (element.isConnected && element.matches(":popover-open")) {
+        if (
+          element.isConnected &&
+          element.matches(":popover-open")
+        ) {
           element.hidePopover?.();
         }
       };
@@ -155,7 +205,11 @@ function Toast({ value, remove }: { value: Notice; remove: () => void }) {
   const dismiss = contextSafe(() => {
     const element = ref.current;
 
-    if (!element || !element.isConnected || ending.current) {
+    if (
+      !element ||
+      !element.isConnected ||
+      ending.current
+    ) {
       return;
     }
 
@@ -181,9 +235,17 @@ function Toast({ value, remove }: { value: Notice; remove: () => void }) {
       className="fixed inset-auto bottom-4 right-4 z-50 m-0 flex w-[calc(100%-2rem)] max-w-sm items-start gap-3 rounded-xl border border-(--border) bg-white p-4 text-(--text-primary) shadow-lg"
     >
       {value.error ? (
-        <AlertCircle size={21} className="shrink-0 text-(--action-danger)" />
+        <AlertCircle
+          size={21}
+          className="shrink-0 text-(--action-danger)"
+          aria-hidden="true"
+        />
       ) : (
-        <CheckCircle2 size={21} className="shrink-0 text-(--action-buy)" />
+        <CheckCircle2
+          size={21}
+          className="shrink-0 text-(--action-buy)"
+          aria-hidden="true"
+        />
       )}
 
       <p className="grow text-sm">{value.text}</p>
@@ -201,25 +263,40 @@ function Toast({ value, remove }: { value: Notice; remove: () => void }) {
   );
 }
 
-export function FeedbackProvider({ children }: { children: ReactNode }) {
+export function FeedbackProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const [notice, setNotice] = useState<Notice | null>(null);
 
-  const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const [confirmation, setConfirmation] =
+    useState<Confirmation | null>(null);
 
   const nextId = useRef(0);
 
-  const pending = useRef<((value: boolean) => void) | null>(null);
+  const pending = useRef<
+    ((value: boolean) => void) | null
+  >(null);
 
-  const notify = useCallback((text: string, error = false) => {
-    setNotice({
-      id: ++nextId.current,
-      text,
-      error,
-    });
-  }, []);
+  const notify = useCallback(
+    (text: string, error = false) => {
+      setNotice({
+        id: ++nextId.current,
+        text,
+        error,
+      });
+    },
+    [],
+  );
 
   const confirm = useCallback(
-    (title: string, message: string, kind: "delete" | "success" = "delete") =>
+    (
+      title: string,
+      message: string,
+      kind: "delete" | "success" = "delete",
+      options?: ConfirmationOptions,
+    ) =>
       new Promise<boolean>((resolve) => {
         pending.current?.(false);
         pending.current = resolve;
@@ -228,6 +305,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
           title,
           message,
           kind,
+          options,
           resolve,
         });
       }),
@@ -250,7 +328,11 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
       )}
 
       {notice && (
-        <Toast key={notice.id} value={notice} remove={() => setNotice(null)} />
+        <Toast
+          key={notice.id}
+          value={notice}
+          remove={() => setNotice(null)}
+        />
       )}
     </Context.Provider>
   );

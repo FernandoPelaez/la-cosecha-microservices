@@ -9,10 +9,15 @@ import {
   Search,
   type LucideIcon,
 } from "lucide-react";
-const styles: Record<
-  string,
-  { label: string; color: string; Icon: LucideIcon }
-> = {
+
+interface StatusStyle {
+  label: string;
+  color: string;
+  Icon: LucideIcon;
+}
+
+// Estilos originales utilizados por los demás módulos.
+const styles: Record<string, StatusStyle> = {
   pendiente: {
     label: "Pendiente",
     color: "bg-amber-50 text-amber-900 border-amber-200",
@@ -109,18 +114,84 @@ const styles: Record<
     Icon: RotateCcw,
   },
 };
-export function StatusBadge({ state }: { state: string }) {
-  const { Icon, label, color } = styles[state] || {
+
+// Paleta aprobada para el módulo Mis pedidos.
+const ORDER_COLORS = {
+  pending:
+    "bg-[#FEF9C3] text-[#854D0E] border-[#FDE047]",
+  paid:
+    "bg-[#DCFCE7] text-[#166534] border-[#86EFAC]",
+  preparing:
+    "bg-[#FFEDD5] text-[#9A3412] border-[#FDBA74]",
+  shipped:
+    "bg-[#DBEAFE] text-[#1E40AF] border-[#93C5FD]",
+  delivered:
+    "bg-[#2F5D43] text-white border-[#2F5D43]",
+  cancelled:
+    "bg-[#FEE2E2] text-[#991B1B] border-[#FCA5A5]",
+} as const;
+
+// Los estados equivalentes comparten un mismo color.
+const orderColors: Record<string, string> = {
+  pendiente: ORDER_COLORS.pending,
+  solicitada: ORDER_COLORS.pending,
+
+  pagado: ORDER_COLORS.paid,
+  capturado: ORDER_COLORS.paid,
+  aprobada: ORDER_COLORS.paid,
+
+  preparacion: ORDER_COLORS.preparing,
+  preparando: ORDER_COLORS.preparing,
+  en_proceso: ORDER_COLORS.preparing,
+
+  enviado: ORDER_COLORS.shipped,
+  en_transito: ORDER_COLORS.shipped,
+
+  entregado: ORDER_COLORS.delivered,
+  validada: ORDER_COLORS.delivered,
+  completado: ORDER_COLORS.delivered,
+
+  cancelado: ORDER_COLORS.cancelled,
+  cancelada: ORDER_COLORS.cancelled,
+  rechazado: ORDER_COLORS.cancelled,
+  rechazada: ORDER_COLORS.cancelled,
+};
+
+interface StatusBadgeProps {
+  state: string;
+  variant?: "default" | "orders";
+}
+
+export function StatusBadge({
+  state,
+  variant = "default",
+}: StatusBadgeProps) {
+  const style = styles[state] || {
     label: state.replaceAll("_", " "),
-    color: "bg-(--surface-soft) text-(--text-secondary) border-(--border)",
+    color:
+      "bg-(--surface-soft) text-(--text-secondary) border-(--border)",
     Icon: Search,
   };
+
+  const { Icon, label } = style;
+
+  // Solo la variante "orders" utiliza la nueva paleta.
+  const color =
+    variant === "orders"
+      ? orderColors[state] || style.color
+      : style.color;
+
   return (
     <span
-      className={`inline-flex gap-1.5 items-center whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-medium border ${color}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-medium ${color}`}
     >
-      <Icon size={12} aria-hidden />
+      <Icon
+        size={12}
+        aria-hidden="true"
+      />
+
       {label}
     </span>
   );
 }
+

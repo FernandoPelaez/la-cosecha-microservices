@@ -6,6 +6,7 @@ export interface OrderLine {
   precio_unitario: string;
   descuento_unitario: string;
 }
+
 export interface Order {
   id_pedido: number;
   id_venta: number | null;

@@ -5,37 +5,63 @@ export class ApiError extends Error {
     public fields: Record<string, string> = {},
   ) {
     super(message);
+    this.name = "ApiError";
   }
 }
+
 export async function api<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const r = await fetch(`/api/${path}`, {
+  const headers = new Headers(options.headers);
+
+  if (
+    typeof options.body === "string" &&
+    !headers.has("Content-Type")
+  ) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  const response = await fetch(`/api/${path}`, {
     ...options,
-    headers: { "Content-Type": "application/json", ...options.headers },
+    headers,
     cache: "no-store",
   });
-  const data = await r
-    .json()
-    .catch(() => ({ error: { message: "Respuesta no válida del servidor" } }));
-  if (!r.ok)
+
+  const data = await response.json().catch(() => ({
+    error: {
+      message: "Respuesta no válida del servidor",
+    },
+  }));
+
+  if (!response.ok) {
     throw new ApiError(
       data.error?.message ||
         data.detail ||
         data.message ||
         "No se pudo completar la operación",
-      r.status,
+      response.status,
       data.error?.fields,
     );
+  }
+
   return data.data as T;
 }
-export const send = <T>(path: string, method: string, body?: unknown) =>
+
+export const send = <T>(
+  path: string,
+  method: string,
+  body?: unknown,
+): Promise<T> =>
   api<T>(path, {
     method,
     body: body === undefined ? undefined : JSON.stringify(body),
   });
+
 export const money = (value: string | number) =>
-  new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(
-    Number(value),
-  );
+  new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+  }).format(Number(value));
+
+

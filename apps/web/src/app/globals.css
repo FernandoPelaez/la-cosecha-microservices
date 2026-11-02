@@ -31,7 +31,9 @@
   }
 
   .field:focus {
-    border-color: var(--action-edit);
+    outline: none;
+    box-shadow: none;
+    border-color: var(--text-primary);
   }
 
   .field:disabled {
@@ -83,3 +85,4 @@
     color: var(--brand-primary);
   }
 }
+

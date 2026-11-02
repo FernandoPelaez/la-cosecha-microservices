@@ -10,3 +10,6 @@ __pycache__/
 **/bin/
 **/obj/
 *.zip
+
+.vercel
+.env*

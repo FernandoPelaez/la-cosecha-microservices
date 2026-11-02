@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   },
   description:
     "De nuestra tierra a tu mesa. Salsas caseras en Los Mochis, Sinaloa.",
+  icons: {
+    icon: "/logo/la-cosecha.png",
+  },
 };
 
 export default function RootLayout({
@@ -28,13 +31,10 @@ export default function RootLayout({
         >
           Ir al contenido
         </a>
-
         <Providers>
           <IntroSequenceProvider>
             <Header />
-
             <main id="contenido">{children}</main>
-
             <Footer />
           </IntroSequenceProvider>
         </Providers>
@@ -42,3 +42,4 @@ export default function RootLayout({
     </html>
   );
 }
+

@@ -2,47 +2,133 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { Profile } from "./profile";
-import { Package, MapPin, MessageSquare, Undo2, UserRound } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useStore } from "@/components/providers";
 import { Button } from "@/components/ui/button";
-
 import { api } from "@/lib/api";
 import type { Address, RecordData } from "@/types";
 import type { Order } from "./types";
+import { Profile } from "./profile";
 import { OrderList } from "./order-list";
 import { AddressList } from "./address-list";
 import { RequestForm } from "./request-form";
+import { RequestList } from "./request-list";
 import { MyReviews } from "./reviews";
 import { VerificationNotice } from "./verification-notice";
 
-const tabs = [
-  { id: "profile", label: "Mis datos", Icon: UserRound },
-  { id: "orders", label: "Mis pedidos", Icon: Package },
-  { id: "addresses", label: "Mis domicilios", Icon: MapPin },
-  { id: "reviews", label: "Mis reseñas", Icon: MessageSquare },
-  { id: "requests", label: "Garantías y devoluciones", Icon: Undo2 },
+const sections = [
+  "profile",
+  "orders",
+  "addresses",
+  "reviews",
+  "requests",
 ];
+
+function RequestHeaderIcon() {
+  const primary = "var(--brand-secondary)";
+  const detail = "var(--brand-cream)";
+
+  return (
+    <svg
+      width={40}
+      height={40}
+      viewBox="0 0 64 64"
+      fill="none"
+      className="mt-1 size-9 shrink-0 sm:size-10"
+      aria-hidden="true"
+    >
+      {/* Flecha circular superior */}
+      <path
+        d="M8.5 23.5C12.2 13.3 21.3 7 32 7c10.3 0 19.3 6.3 23 15.6"
+        stroke={primary}
+        strokeWidth="3.2"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="m47.5 18.2 8.2 5.3.6-10"
+        stroke={primary}
+        strokeWidth="3.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Flecha circular inferior */}
+      <path
+        d="M55.5 40.5C51.8 50.7 42.7 57 32 57c-10.3 0-19.3-6.3-23-15.6"
+        stroke={primary}
+        strokeWidth="3.2"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="m16.5 45.8-8.2-5.3-.6 10"
+        stroke={primary}
+        strokeWidth="3.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Caja central */}
+      <path
+        d="m20 25 12-4 12 4-12 4z"
+        fill={primary}
+      />
+
+      <path
+        d="m19.5 34 12.5 6 12.5-6v12L32 52l-12.5-6z"
+        fill={primary}
+      />
+
+      <path
+        d="m32 40 0 12"
+        stroke={detail}
+        strokeWidth="1.5"
+      />
+
+      <path
+        d="m20 25-7.6 7.3 12.9 6.2L32 29z"
+        fill={primary}
+        stroke={detail}
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="m44 25 7.6 7.3-12.9 6.2L32 29z"
+        fill={primary}
+        stroke={detail}
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export function Account() {
   const { user, loadingUser } = useStore();
-
-  const params = useSearchParams(),
-    router = useRouter();
+  const params = useSearchParams();
   const chosen = params.get("seccion") || "orders";
-  const tab = tabs.some((t) => t.id === chosen) ? chosen : "orders";
-  const [orders, setOrders] = useState<Order[]>([]),
-    [addresses, setAddresses] = useState<Address[]>([]),
-    [requests, setRequests] = useState<RecordData[]>([]),
-    [errors, setErrors] = useState<Record<string, string>>({}),
-    [loading, setLoading] = useState(true);
+  const tab = sections.includes(chosen) ? chosen : "orders";
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [requests, setRequests] = useState<RecordData[]>([]);
+  const [errors, setErrors] = useState<
+    Record<string, string>
+  >({});
 
+  const [loading, setLoading] = useState(true);
+
+  /**
+   * Cargar la información de la cuenta.
+   *
+   * Las consultas se ejecutan de forma independiente
+   * para que un error en un servicio no impida
+   * consultar los demás módulos.
+   */
   const load = useCallback(async () => {
     setLoading(true);
 
-    // Una caída en posventa no impide consultar domicilios ni pedidos.
     const [o, a, r, w] = await Promise.allSettled([
       api<Order[]>("history"),
       api<Address[]>("addresses"),
@@ -52,24 +138,27 @@ export function Account() {
 
     const failures: Record<string, string> = {};
 
+    // Historial de pedidos.
     if (o.status === "fulfilled") {
       setOrders(o.value);
     } else {
       failures.orders = o.reason.message;
     }
 
+    // Domicilios.
     if (a.status === "fulfilled") {
       setAddresses(a.value);
     } else {
       failures.addresses = a.reason.message;
     }
 
+    // Unificar devoluciones y garantías.
     const list: RecordData[] = [];
 
     if (r.status === "fulfilled") {
       list.push(
-        ...r.value.map((v) => ({
-          ...v,
+        ...r.value.map((value) => ({
+          ...value,
           tipo: "Devolución",
         })),
       );
@@ -79,8 +168,8 @@ export function Account() {
 
     if (w.status === "fulfilled") {
       list.push(
-        ...w.value.map((v) => ({
-          ...v,
+        ...w.value.map((value) => ({
+          ...value,
           tipo: "Garantía",
         })),
       );
@@ -93,12 +182,14 @@ export function Account() {
     setLoading(false);
   }, []);
 
+  // Consultar información únicamente para clientes.
   useEffect(() => {
     if (user?.rol === "CLIENTE" && user.clienteId) {
       void load();
     }
   }, [user?.clienteId, user?.rol, load]);
 
+  // Esperar la sesión del usuario.
   if (loadingUser) {
     return (
       <div className="page" role="status">
@@ -107,17 +198,23 @@ export function Account() {
     );
   }
 
+  // Usuario sin sesión.
   if (!user) {
     return (
       <div className="page">
         <div className="panel p-8 text-center">
-          <h1 className="page-title">Mi cuenta</h1>
+          <h1 className="page-title">
+            Mi cuenta
+          </h1>
 
           <p className="my-4 text-sm text-(--text-secondary)">
             Consulta tus pedidos y domicilios desde tu cuenta.
           </p>
 
-          <Link href="/iniciar-sesion" className="action-link">
+          <Link
+            href="/iniciar-sesion"
+            className="action-link"
+          >
             Iniciar sesión
           </Link>
         </div>
@@ -127,41 +224,22 @@ export function Account() {
 
   return (
     <div className="page">
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-(--border) pb-5">
-        <div>
-          <p className="eyebrow mb-1.5">Mi cuenta</p>
+      {/* Aviso de verificación del correo */}
+      {!user.correo_verificado && (
+        <VerificationNotice />
+      )}
 
-          <h1 className="page-title">Tu espacio, a tu manera.</h1>
-        </div>
-      </div>
-
-      {!user.correo_verificado && <VerificationNotice />}
-
+      {/* Acceso de administración */}
       {user.rol !== "CLIENTE" ? (
-        <Link href="/admin" className="action-link">
+        <Link
+          href="/admin"
+          className="action-link"
+        >
           Abrir administración
         </Link>
       ) : (
         <>
-          <nav
-            aria-label="Secciones de mi cuenta"
-            className="mb-5 grid grid-cols-2 border-b border-(--border) sm:flex sm:flex-wrap"
-          >
-            {tabs.map((t) => (
-              <button
-                key={t.id}
-                className="tab text-xs! sm:text-sm!"
-                aria-pressed={tab === t.id}
-                onClick={() =>
-                  router.replace(`/cuenta?seccion=${t.id}`, { scroll: false })
-                }
-              >
-                <t.Icon size={16} className="shrink-0" />
-                {t.label}
-              </button>
-            ))}
-          </nav>
-
+          {/* Errores específicos de cada módulo */}
           {errors[tab] && (
             <div
               role="alert"
@@ -169,23 +247,34 @@ export function Account() {
             >
               {errors[tab]}
 
-              <Button onClick={() => void load()}>Reintentar</Button>
+              <Button onClick={() => void load()}>
+                Reintentar
+              </Button>
             </div>
           )}
 
+          {/* Datos personales */}
           {tab === "profile" ? (
             <Profile />
           ) : loading ? (
-            <p role="status" className="py-5 text-sm">
+            <p
+              role="status"
+              className="py-5 text-sm"
+            >
               Consultando tu información…
             </p>
           ) : (
             <div key={tab}>
+              {/* Historial de pedidos */}
               {tab === "orders" ? (
                 !errors.orders && (
-                  <OrderList orders={orders} onRefresh={() => void load()} />
+                  <OrderList
+                    orders={orders}
+                    onRefresh={() => void load()}
+                  />
                 )
               ) : tab === "addresses" ? (
+                /* Domicilios */
                 !errors.addresses && (
                   <AddressList
                     addresses={addresses}
@@ -193,44 +282,44 @@ export function Account() {
                   />
                 )
               ) : tab === "reviews" ? (
+                /* Reseñas */
                 <MyReviews />
               ) : (
-                <div className="grid items-start gap-5 lg:grid-cols-2">
-                  <RequestForm orders={orders} onSaved={() => void load()} />
+                /* Garantías y devoluciones */
+                <section
+                  aria-labelledby="requests-title"
+                  className="min-w-0"
+                >
+                  {/* Encabezado principal */}
+                  <header className="mb-7 flex min-w-0 items-start gap-3 border-b border-(--border) pb-6 sm:gap-4">
+                    <RequestHeaderIcon />
 
-                  <div className="space-y-3">
-                    {requests.length ? (
-                      requests.map((r) => (
-                        <article
-                          key={`${r.tipo}-${r.id}`}
-                          className="panel p-5"
-                        >
-                          <div className="flex flex-wrap justify-between gap-2">
-                            <h2 className="text-sm font-semibold">
-                              {String(r.tipo)} #{String(r.id)}
-                            </h2>
+                    <div className="min-w-0">
+                      <h1
+                        id="requests-title"
+                        className="font-display text-2xl text-(--brand-secondary) sm:text-3xl lg:text-4xl"
+                      >
+                        Garantías y devoluciones
+                      </h1>
 
-                            <StatusBadge state={String(r.estado)} />
-                          </div>
-
-                          <p className="mt-3 text-sm">
-                            {String(r.nombre)} · {String(r.motivo)}
-                          </p>
-
-                          {r.resolucion ? (
-                            <p className="mt-2 text-sm text-(--text-secondary)">
-                              {String(r.resolucion)}
-                            </p>
-                          ) : null}
-                        </article>
-                      ))
-                    ) : (
-                      <p className="p-5 text-sm text-(--text-secondary)">
-                        No tienes solicitudes registradas.
+                      <p className="mt-2 text-sm leading-6 text-(--text-secondary)">
+                        Registra una solicitud o consulta el estado
+                        de tus garantías y devoluciones.
                       </p>
-                    )}
-                  </div>
-                </div>
+                    </div>
+                  </header>
+
+                  {/* Formulario de solicitudes */}
+                  <RequestForm
+                    orders={orders}
+                    onSaved={() => void load()}
+                  />
+
+                  {/* Historial de solicitudes */}
+                  <RequestList
+                    requests={requests}
+                  />
+                </section>
               )}
             </div>
           )}
@@ -239,3 +328,4 @@ export function Account() {
     </div>
   );
 }
+
