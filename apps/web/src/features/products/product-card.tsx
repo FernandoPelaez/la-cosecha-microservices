@@ -33,6 +33,7 @@ export function ProductCard({
   const root = useRef<HTMLElement>(null);
   const { addToCart } = useStore();
   const [busy, setBusy] = useState(false);
+
   const { contextSafe } = useGSAP({
     scope: root,
   });
@@ -62,7 +63,9 @@ export function ProductCard({
   // Agregar el producto al carrito.
   const handleAddToCart = async () => {
     if (busy) return;
+
     setBusy(true);
+
     try {
       await addToCart(product.id);
     } finally {
@@ -73,7 +76,7 @@ export function ProductCard({
   return (
     <article
       ref={root}
-      className="product-card"
+      className="product-card flex h-full flex-col"
       onPointerEnter={() => pose(true)}
       onPointerLeave={() => pose(false)}
     >
@@ -120,7 +123,7 @@ export function ProductCard({
 
       {/* Calificaciones y opiniones */}
       {Number(product.review_count) > 0 && (
-        <p className="text-xs mb-2 inline-flex gap-1 items-center">
+        <p className="text-xs mb-2 inline-flex items-center gap-1">
           <Star size={12} />
 
           {Number(product.rating).toFixed(1)}
@@ -129,8 +132,8 @@ export function ProductCard({
         </p>
       )}
 
-      {/* Precio y botón para agregar al carrito */}
-      <div className="product-buy-row">
+      {/* Precio y botón alineados al final de la tarjeta */}
+      <div className="product-buy-row mt-auto">
         <div className="product-price">
           {Number(product.precio_final) <
             Number(product.precio) && (
@@ -163,7 +166,7 @@ export function ProductCard({
       </div>
 
       {/* Disponibilidad del producto */}
-      <p className="product-availability">
+      <p className="product-availability min-h-8 sm:min-h-4">
         {product.stock_actual > 0 ? (
           <>
             <Check

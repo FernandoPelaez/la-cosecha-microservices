@@ -1,11 +1,15 @@
 @theme {
   --font-display:
     "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  --font-sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+
+  --font-sans:
+    "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
 :root {
   color-scheme: light;
+
+  /* Colores principales de LA COSECHA */
   --brand-primary: #a21e16;
   --brand-primary-hover: #84170f;
   --brand-secondary: #365b43;
@@ -14,17 +18,25 @@
   --brand-orange: #b85421;
   --brand-olive: #365b43;
   --brand-cream: #faf8f1;
+
+  /* Acciones */
   --action-buy: #365b43;
   --action-buy-hover: #274734;
   --action-edit: #245e8d;
   --action-danger: #b32627;
+
+  /* Superficies */
   --background: #faf8f1;
   --surface: #fffefa;
   --surface-soft: #f0f0e6;
   --surface-blue: #edf4fa;
+
+  /* Tipografía */
   --text-primary: #303628;
   --text-secondary: #666b5c;
   --text-muted: #6b6f62;
+
+  /* Bordes */
   --border: #dddccd;
   --border-strong: #b7bba8;
 }
@@ -47,6 +59,7 @@ body {
   box-sizing: border-box;
 }
 
+/* Evitar resaltados táctiles del navegador. */
 button,
 a,
 input,
@@ -60,59 +73,99 @@ select {
   cursor: pointer;
 }
 
-
+/*
+ * ACCESIBILIDAD
+ *
+ * Conservar un indicador verde para botones,
+ * enlaces y controles que no utilizan un borde
+ * convencional como indicador de enfoque.
+ */
 button:focus-visible,
 a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--action-edit);
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible,
+input[type="range"]:focus-visible,
+input[type="file"]:focus-visible,
+input[type="color"]:focus-visible {
+  outline: 2px solid var(--brand-secondary);
   outline-offset: 3px;
 }
 
-input.field:focus-visible {
+/*
+ * CAMPOS DE FORMULARIO
+ *
+ * Eliminar el contorno adicional y las sombras
+ * que aparecen al seleccionar los campos.
+ *
+ * Se conserva un único borde de enfoque.
+ */
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
+  outline-offset: 0;
+  box-shadow: none;
 }
 
+/*
+ * Mantener el borde verde de LA COSECHA.
+ *
+ * No modificar los campos que muestran
+ * un error de validación.
+ */
+input:not([aria-invalid="true"]):focus,
+select:not([aria-invalid="true"]):focus,
+textarea:not([aria-invalid="true"]):focus {
+  border-color: var(--brand-secondary);
+}
 
+/* Mantener los controles de selección originales. */
 input[type="radio"],
 input[type="checkbox"] {
   accent-color: var(--action-buy);
 }
 
+/* Control nativo para limpiar búsquedas. */
 input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance: none;
 }
 
+/* Selección de texto. */
 ::selection {
   background: #f0d8c8;
   color: #671a14;
 }
 
+/* Fondo de ventanas de diálogo. */
 dialog::backdrop {
   background: #192b24a6;
 }
 
+/* Contenedor principal. */
 .shell {
   width: min(1440px, calc(100% - 80px));
   margin-inline: auto;
 }
 
+/* Pantallas grandes. */
 @media (min-width: 1600px) {
   .shell {
     width: min(1600px, calc(100% - 160px));
   }
 }
 
+/* Tablets y laptops pequeñas. */
 @media (max-width: 1150px) {
   .shell {
     width: calc(100% - 48px);
   }
 }
 
+/* Dispositivos móviles. */
 @media (max-width: 600px) {
   .shell {
     width: calc(100% - 32px);
   }
 }
+
 

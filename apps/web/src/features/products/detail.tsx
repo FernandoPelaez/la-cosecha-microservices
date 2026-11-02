@@ -1,20 +1,17 @@
 "use client";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+
 import { ProductContent } from "./product-content";
-export function ProductDetail({ id }: { id: number }) {
+
+type ProductDetailProps = {
+  id: number;
+};
+
+export function ProductDetail({ id }: ProductDetailProps) {
+  // La navegación de regreso y los detalles pertenecen a ProductContent.
+  // No agregar paneles que encierren toda la página.
   return (
-    <div className="page max-w-5xl!">
-      <Link
-        href="/"
-        className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm"
-      >
-        <ArrowLeft size={16} />
-        Ir a la tienda
-      </Link>
-      <div className="panel">
-        <ProductContent key={id} id={id} standalone />
-      </div>
+    <div className="page pb-12 pt-5 sm:pt-8 lg:pb-16">
+      <ProductContent key={id} id={id} standalone />
     </div>
   );
 }

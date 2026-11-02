@@ -2,17 +2,14 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SearchX } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-
 import { useStore } from "@/components/providers";
 import { useIntroSequence } from "@/components/ui/intro-sequence";
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
 import { ProductCard } from "./product-card";
-import { ProductContent } from "./product-content";
 
 gsap.registerPlugin(useGSAP);
 
@@ -22,34 +19,27 @@ const normalize = (text: string) =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLocaleLowerCase("es");
-
 const hiddenUntilAnimation = {
   opacity: 0,
   visibility: "hidden" as const,
 };
-
 export function Catalog() {
   const root = useRef<HTMLElement>(null);
   const { contentReady } = useIntroSequence();
-
   const {
     products,
     loadingProducts,
     productsError,
     refreshProducts,
   } = useStore();
-
+  const router = useRouter();
   const params = useSearchParams();
   const q = (params.get("q") || "").trim();
-
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState("default");
-  const [selected, setSelected] = useState<number | null>(null);
-
   const categories = [
     ...new Set(products.map((p) => p.categoria).filter(Boolean)),
   ];
-
   const filtered = products
     .filter(
       (p) =>
@@ -71,27 +61,22 @@ export function Catalog() {
     const section = root.current;
     const hero = document.querySelector<HTMLElement>(".home-hero");
     if (!section || !hero) return;
-
     const originalHeight = hero.style.minHeight;
     const originalMargin = section.style.marginTop;
-
     const updateHeroHeight = () => {
+
       // Medir su tamaño natural antes de aplicar el ajuste.
       hero.style.minHeight = originalHeight;
       section.style.removeProperty("margin-top");
-
       const heroTop = hero.getBoundingClientRect().top + window.scrollY;
       const naturalHeight = hero.getBoundingClientRect().height;
       const availableHeight = window.innerHeight - heroTop - 24;
-
       if (availableHeight > naturalHeight) {
         hero.style.minHeight = `${availableHeight}px`;
       }
     };
-
     updateHeroHeight();
     window.addEventListener("resize", updateHeroHeight);
-
     return () => {
       window.removeEventListener("resize", updateHeroHeight);
       hero.style.minHeight = originalHeight;
@@ -103,23 +88,19 @@ export function Catalog() {
     (_, contextSafe) => {
       const section = root.current;
       if (!section) return;
-
       // Ocultar los textos desde el inicio, incluso antes de que termine el Hero.
+
       const entranceElements = section.querySelectorAll<HTMLElement>(
         ".catalog-heading .eyebrow, " +
           "#catalog-title, " +
           ".catalog-heading > p, " +
           ".catalog-controls",
       );
-
       gsap.set(entranceElements, { autoAlpha: 0 });
-
       if (!contentReady || !contextSafe) return;
-
       const reducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       ).matches;
-
       if (reducedMotion) {
         gsap.set(entranceElements, { autoAlpha: 1 });
         return;
@@ -129,19 +110,15 @@ export function Catalog() {
       let productsObserver: MutationObserver | null = null;
       let sequence: gsap.core.Timeline | null = null;
       let cardsAnimated = false;
-
       const animateCards = contextSafe(() => {
         if (cardsAnimated) return;
-
         const cards = section.querySelectorAll<HTMLElement>(
           ".catalog-grid > :not([aria-hidden])",
         );
 
         if (!cards.length) return;
-
         cardsAnimated = true;
         productsObserver?.disconnect();
-
         const from = { autoAlpha: 0, y: 24 };
         const to = {
           autoAlpha: 1,
@@ -170,11 +147,9 @@ export function Catalog() {
         const controls = section.querySelector<HTMLElement>(
           ".catalog-controls",
         );
-
         sequence = gsap.timeline({
           defaults: { ease: "power2.out" },
         });
-
         if (eyebrow) {
           sequence.fromTo(
             eyebrow,
@@ -229,15 +204,12 @@ export function Catalog() {
             "-=0.2",
           );
         }
-
         // Las tarjetas esperan a que existan productos reales.
         animateCards();
-
         if (!cardsAnimated && "MutationObserver" in window) {
           productsObserver = new MutationObserver(() => {
             animateCards();
           });
-
           productsObserver.observe(section, {
             childList: true,
             subtree: true,
@@ -247,7 +219,6 @@ export function Catalog() {
 
       if (!("IntersectionObserver" in window)) {
         animateCatalog();
-
         return () => {
           productsObserver?.disconnect();
         };
@@ -256,7 +227,6 @@ export function Catalog() {
       viewportObserver = new IntersectionObserver(
         (entries) => {
           if (!entries.some((entry) => entry.isIntersecting)) return;
-
           viewportObserver?.disconnect();
           animateCatalog();
         },
@@ -265,11 +235,9 @@ export function Catalog() {
           threshold: 0.15,
         },
       );
-
       // Observar el encabezado, no toda la altura del catálogo.
       const heading = section.querySelector(".catalog-heading");
       viewportObserver.observe(heading ?? section);
-
       return () => {
         viewportObserver?.disconnect();
         productsObserver?.disconnect();
@@ -306,13 +274,11 @@ export function Catalog() {
               : `${filtered.length} variedades en el catálogo`}
         </p>
       </div>
-
       <div className="catalog-controls" style={hiddenUntilAnimation}>
         <div className="catalog-pills">
           <button aria-pressed={!category} onClick={() => setCategory("")}>
             Todas las salsas
           </button>
-
           {categories.length > 1 &&
             categories.map((c) => (
               <button
@@ -329,8 +295,8 @@ export function Catalog() {
               Limpiar búsqueda
             </Link>
           )}
-        </div>
 
+        </div>
         <label>
           Ordenar por
           <select value={sort} onChange={(e) => setSort(e.target.value)}>
@@ -343,7 +309,6 @@ export function Catalog() {
       </div>
 
       {q && <p className="mb-5 text-sm">Resultados para «{q}»</p>}
-
       {productsError && (
         <div role="alert" className="panel p-6 flex flex-wrap gap-4 items-center">
           <p className="grow text-sm text-(--action-danger)">{productsError}</p>
@@ -364,6 +329,7 @@ export function Catalog() {
             ))}
           </div>
         </div>
+
       ) : filtered.length ? (
         <div className="catalog-grid">
           {filtered.map((product, index) => (
@@ -372,11 +338,12 @@ export function Catalog() {
               product={product}
               index={index}
               priority={index < 4}
-              onOpen={() => setSelected(product.id)}
+              onOpen={() => router.push(`/producto/${product.id}`)}
             />
           ))}
         </div>
       ) : (
+
         !productsError && (
           <div className="panel py-12 px-6 text-center">
             <SearchX className="mx-auto mb-3" size={28} />
@@ -391,16 +358,7 @@ export function Catalog() {
           </div>
         )
       )}
-
-      {selected !== null && (
-        <Dialog
-          wide
-          title="Detalle de la salsa"
-          onClose={() => setSelected(null)}
-        >
-          <ProductContent id={selected} />
-        </Dialog>
-      )}
+      
     </section>
   );
 }

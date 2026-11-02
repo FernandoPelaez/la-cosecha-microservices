@@ -763,8 +763,10 @@
     gap: 24px;
   }
 
-  .footer-brand {
+  /* El bloque completo de marca y ubicacion ocupa las dos columnas. */
+  .footer-grid > div:first-child {
     grid-column: 1 / -1;
+    min-width: 0;
   }
 
   .auth-layout {
@@ -935,16 +937,58 @@
     grid-template-columns: 1fr;
   }
 
+  /* Footer: distribucion legible sin alterar el escritorio ni los enlaces. */
+  .site-footer {
+    padding-top: 32px;
+  }
+
   .footer-grid {
-    gap: 24px 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+    row-gap: 24px;
+    padding-bottom: 28px;
+  }
+
+  .footer-brand {
+    gap: 14px;
+    min-width: 0;
   }
 
   .footer-brand h2 {
-    font-size: 25px;
+    min-width: 0;
+    max-width: 360px;
+    font-size: clamp(20px, 5.5vw, 25px);
+    line-height: 1.2;
+    text-wrap: balance;
   }
 
   .footer-brand img {
-    width: 78px;
+    width: 72px;
+    height: auto;
+  }
+
+  .footer-location {
+    margin-top: 12px;
+  }
+
+  .footer-links {
+    min-width: 0;
+  }
+
+  .footer-links h3 {
+    margin: 0 0 14px;
+  }
+
+  .footer-links a {
+    margin-block: 11px;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+  }
+
+  .footer-bottom {
+    gap: 10px;
+    padding-block: 16px;
+    line-height: 1.5;
   }
 
   .auth-layout {
@@ -960,8 +1004,8 @@
   }
 }
 
-/* En móvil estrecho el propio logotipo conserva el nombre de la marca.
-   Reservar el ancho de los controles evita que la palabra invada la cuenta. */
+/* En móvil estrecho el propio logotipo conserva el nombre de la marca.*
+*   Reservar el ancho de los controles evita que la palabra invada la cuenta. */
 @media (max-width: 440px) {
   .brand-copy {
     display: none;

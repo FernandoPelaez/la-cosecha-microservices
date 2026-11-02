@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { MapPin, Pencil, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { useFeedback } from "@/components/ui/feedback";
 import { send } from "@/lib/api";
@@ -22,7 +23,6 @@ export function AddressList({
   >(undefined);
 
   const [busy, setBusy] = useState(false);
-
   const { notify, confirm } = useFeedback();
 
   // Conserva la eliminación con confirmación previa.
@@ -84,19 +84,21 @@ export function AddressList({
           </div>
         </div>
 
-        <button
+        <Button
           type="button"
+          variant="save"
+          size="compact"
           onClick={() => setEditing(null)}
-          className="inline-flex min-h-10 w-fit shrink-0 items-center justify-center gap-2 self-start rounded-lg bg-(--brand-secondary) px-4 py-2 text-sm font-semibold text-white hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brand-secondary) sm:self-auto"
+          className="w-fit shrink-0 self-start sm:self-auto"
         >
           <Plus
-            size={17}
+            size={15}
             strokeWidth={1.8}
             aria-hidden="true"
           />
 
           Agregar domicilio
-        </button>
+        </Button>
       </header>
 
       {/* Domicilios presentados como filas, sin tarjetas. */}
@@ -211,4 +213,5 @@ export function AddressList({
     </section>
   );
 }
+
 
