@@ -1,3 +1,4 @@
+// Error personalizado para las respuestas fallidas de la API.
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -9,6 +10,7 @@ export class ApiError extends Error {
   }
 }
 
+// Centraliza las peticiones HTTP y el manejo de errores.
 export async function api<T>(
   path: string,
   options: RequestInit = {},
@@ -48,6 +50,7 @@ export async function api<T>(
   return data.data as T;
 }
 
+// Simplifica las peticiones que requieren enviar información.
 export const send = <T>(
   path: string,
   method: string,
@@ -58,10 +61,10 @@ export const send = <T>(
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 
+// Formatea cantidades monetarias en pesos mexicanos.
 export const money = (value: string | number) =>
   new Intl.NumberFormat("es-MX", {
     style: "currency",
     currency: "MXN",
   }).format(Number(value));
-
-
+  

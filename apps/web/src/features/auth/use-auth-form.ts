@@ -2,23 +2,23 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ApiError, send } from "@/lib/api";
 import { useStore } from "@/components/providers";
 import { useFeedback } from "@/components/ui/feedback";
+import { ApiError, send } from "@/lib/api";
 
 export type AuthMode = "login" | "register" | "recover" | "reset" | "verify";
 
 type AuthResponse = {
   mailSent?: boolean;
   message?: string;
+  rol?: string;
 };
 
-// Administra el estado y las acciones de los cinco flujos de autenticación.
+// Administra el estado y las acciones de los flujos de autenticación.
 export function useAuthForm(mode: AuthMode, token: string) {
   const { refreshUser } = useStore();
   const { notify } = useFeedback();
   const router = useRouter();
-
   const [botToken, setBotToken] = useState("");
   const [busy, setBusy] = useState(false);
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -45,8 +45,16 @@ export function useAuthForm(mode: AuthMode, token: string) {
       });
 
       if (mode === "login") {
+        // Sincronizar la sesión antes de navegar.
         await refreshUser();
-        router.push("/cuenta");
+
+        // Redirigir según el rol recibido del servidor.
+        const destination =
+          result.rol && result.rol !== "CLIENTE"
+            ? "/admin"
+            : "/cuenta";
+
+        router.push(destination);
         router.refresh();
       } else if (mode === "register") {
         setMessage(
@@ -87,3 +95,4 @@ export function useAuthForm(mode: AuthMode, token: string) {
     handleSubmit,
   };
 }
+

@@ -3,6 +3,7 @@
 import { useRef, type MouseEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { CreditCard, MapPin } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -10,17 +11,25 @@ import { useGSAP } from "@gsap/react";
 gsap.registerPlugin(useGSAP);
 
 export function Footer() {
+  const pathname = usePathname();
   const footerRef = useRef<HTMLElement>(null);
+
+  // El Footer comercial no pertenece al panel administrativo.
+  const isAdminRoute =
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/");
 
   useGSAP(
     () => {
+      if (isAdminRoute) return;
+
       const footer = footerRef.current;
       if (!footer) return;
 
       const grid = footer.querySelector<HTMLElement>(
         ".footer-grid",
       );
-      
+
       const columns = footer.querySelectorAll<HTMLElement>(
         ".footer-grid > div",
       );
@@ -94,12 +103,15 @@ export function Footer() {
       );
 
       observer.observe(grid);
+
       return () => {
         observer.disconnect();
       };
     },
     {
       scope: footerRef,
+      dependencies: [isAdminRoute],
+      revertOnUpdate: true,
     },
   );
 
@@ -137,6 +149,11 @@ export function Footer() {
       behavior: reducedMotion ? "auto" : "smooth",
     });
   };
+
+  // No renderizar el Footer dentro de administración.
+  if (isAdminRoute) {
+    return null;
+  }
 
   return (
     <footer
@@ -221,4 +238,3 @@ export function Footer() {
     </footer>
   );
 }
-

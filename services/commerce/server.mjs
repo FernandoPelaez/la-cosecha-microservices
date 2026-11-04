@@ -17,6 +17,7 @@ import { orderResult } from "./order-result.mjs";
 
 const app = application("commerce");
 
+// Webhook de Stripe: conserva el cuerpo original para validar la firma.
 app.post(
   "/webhook",
   express.raw({
@@ -44,13 +45,18 @@ app.post(
     ];
 
     if (supportedEvents.includes(event.type)) {
-      await settleSession(event.data.object, event.id, event.type);
+      await settleSession(
+        event.data.object,
+        event.id,
+        event.type,
+      );
     }
 
     ok(res, { received: true });
   },
 );
 
+// Configuración de seguridad y procesamiento de solicitudes.
 app.use(
   internal,
   express.json({
@@ -63,6 +69,8 @@ app.get("/payment-methods", async (_req, res) => {
 });
 
 app.use(auth);
+
+// Restringe las operaciones de compra a usuarios con rol CLIENTE.
 app.use(
   [
     "/cart",
@@ -75,12 +83,16 @@ app.use(
   roles("CLIENTE"),
 );
 
+// Carrito de compras.
 app.get("/cart", async (req, res) => {
-  ok(res, await getCart(req.user.clienteId));
+  const result = await getCart(req.user.clienteId);
+
+  ok(res, result);
 });
 
 app.put("/cart/:id", async (req, res) => {
   const productId = id.parse(req.params.id);
+
   const quantity = z.coerce
     .number()
     .int()
@@ -88,11 +100,16 @@ app.put("/cart/:id", async (req, res) => {
     .max(10000)
     .parse(req.body.cantidad);
 
-  const result = await setCartItem(req.user.clienteId, productId, quantity);
+  const result = await setCartItem(
+    req.user.clienteId,
+    productId,
+    quantity,
+  );
 
   ok(res, result);
 });
 
+// Procesamiento de pedidos y pagos.
 app.post("/checkout", async (req, res) => {
   const data = z
     .object({
@@ -103,37 +120,50 @@ app.post("/checkout", async (req, res) => {
     .parse(req.body);
 
   const result = await checkout(req.user, data);
+
   ok(res, result, 201);
 });
 
 app.post("/retry-payment/:id", async (req, res) => {
   const orderId = id.parse(req.params.id);
   const result = await paymentLink(req.user, orderId);
+
   ok(res, result);
 });
-app.post("/cancel-order/:id", async (req, res) =>
-  ok(res, await cancelOrder(req.user, id.parse(req.params.id))),
-);
+
+app.post("/cancel-order/:id", async (req, res) => {
+  const orderId = id.parse(req.params.id);
+  const result = await cancelOrder(req.user, orderId);
+
+  ok(res, result);
+});
 
 app.get("/order-result/:id", async (req, res) => {
   const orderId = id.parse(req.params.id);
-  ok(res, await orderResult(req.user, orderId));
+  const result = await orderResult(req.user, orderId);
+
+  ok(res, result);
 });
 
+// Registra las rutas especializadas del microservicio.
 addressRoutes(app);
 purchaseRoutes(app);
 administrationRoutes(app);
 
+// Consulta y generación de comprobantes.
 app.get("/receipts/:id", async (req, res) => {
   const receiptId = id.parse(req.params.id);
   const result = await receipt(req.user, receiptId);
+
   ok(res, result);
 });
 
 app.get("/receipts/:id/pdf", async (req, res) => {
   const receiptId = id.parse(req.params.id);
+
   const data = await receipt(req.user, receiptId);
   const pdf = await receiptPDF(data);
+
   res
     .set({
       "Content-Type": "application/pdf",
@@ -145,6 +175,7 @@ app.get("/receipts/:id/pdf", async (req, res) => {
 app.post("/receipts/:id/email", async (req, res) => {
   const receiptId = id.parse(req.params.id);
   const result = await emailReceipt(req.user, receiptId);
+
   ok(res, result);
 });
 

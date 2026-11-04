@@ -1,5 +1,4 @@
 import { z } from "zod";
-
 import { query, transaction } from "../../packages/core/db.mjs";
 import { ensure } from "../../packages/core/errors.mjs";
 import { cents, decimal } from "../../packages/core/money.mjs";
@@ -9,108 +8,154 @@ import { ok } from "../../packages/core/http.mjs";
 import { roles } from "../../packages/core/security.mjs";
 
 export function purchaseRoutes(app) {
-  app.get("/purchases", roles("ADMIN", "INVENTARIO"), async (_req, res) => {
-    const purchases = await query(
-      `SELECT
+  // Consulta las compras registradas.
+  app.get(
+    "/purchases",
+    roles("ADMIN", "INVENTARIO"),
+    async (_req, res) => {
+      const purchases = await query(`
+        SELECT
           c.*,
           p.nombre AS proveedor
-        FROM compras c
-        JOIN proveedores p ON p.id = c.id_proveedor
+        FROM compras AS c
+        INNER JOIN proveedores AS p
+          ON p.id = c.id_proveedor
         ORDER BY c.id DESC
-        LIMIT 500`,
-    );
+        LIMIT 500
+      `);
 
-    ok(res, purchases);
-  });
+      ok(res, purchases);
+    },
+  );
 
-  app.get("/purchases/:id", roles("ADMIN", "INVENTARIO"), async (req, res) => {
-    const purchaseId = id.parse(req.params.id);
+  // Obtiene los productos asociados a una compra.
+  app.get(
+    "/purchases/:id",
+    roles("ADMIN", "INVENTARIO"),
+    async (req, res) => {
+      const purchaseId = id.parse(req.params.id);
 
-    const details = await query(
-      `SELECT
-          d.*,
-          p.nombre
-        FROM detalle_compras d
-        JOIN productos p ON p.id = d.id_producto
-        WHERE d.id_compra = ?`,
-      [purchaseId],
-    );
-
-    ok(res, details);
-  });
-
-  app.post("/purchases", roles("ADMIN", "INVENTARIO"), async (req, res) => {
-    const data = z
-      .object({
-        id_proveedor: id,
-        items: z
-          .array(
-            z.object({
-              id_producto: id,
-              cantidad: quantity,
-              costo_unitario: money,
-            }),
-          )
-          .min(1)
-          .max(100),
-      })
-      .parse(req.body);
-
-    const productIds = data.items.map((item) => item.id_producto);
-
-    ensure(
-      new Set(productIds).size === productIds.length,
-      422,
-      "No repitas productos",
-    );
-
-    const result = await transaction(async (connection) => {
-      let total = 0;
-
-      // Valida que cada producto pertenezca al proveedor.
-      for (const item of data.items) {
-        const [product] = await query(
-          `SELECT id
-             FROM productos
-             WHERE id = ? AND id_proveedor = ?`,
-          [item.id_producto, data.id_proveedor],
-          connection,
-        );
-
-        ensure(product, 422, "El producto no corresponde al proveedor");
-
-        total += cents(item.costo_unitario) * item.cantidad;
-      }
-
-      const purchase = await query(
-        `INSERT INTO compras
-            (id_proveedor, id_usuario, total)
-           VALUES (?, ?, ?)`,
-        [data.id_proveedor, req.user.id, decimal(total)],
-        connection,
+      const details = await query(
+        `
+          SELECT
+            d.*,
+            p.nombre
+          FROM detalle_compras AS d
+          INNER JOIN productos AS p
+            ON p.id = d.id_producto
+          WHERE d.id_compra = ?
+        `,
+        [purchaseId],
       );
 
-      for (const item of data.items) {
-        await query(
-          `INSERT INTO detalle_compras
-              (id_compra, id_producto, cantidad, costo_unitario)
-             VALUES (?, ?, ?, ?)`,
+      ok(res, details);
+    },
+  );
+
+  // Registra una compra y sus productos dentro de una transacción.
+  app.post(
+    "/purchases",
+    roles("ADMIN", "INVENTARIO"),
+    async (req, res) => {
+      const data = z
+        .object({
+          id_proveedor: id,
+          items: z
+            .array(
+              z.object({
+                id_producto: id,
+                cantidad: quantity,
+                costo_unitario: money,
+              }),
+            )
+            .min(1)
+            .max(100),
+        })
+        .parse(req.body);
+
+      const productIds = data.items.map(
+        (item) => item.id_producto,
+      );
+
+      ensure(
+        new Set(productIds).size === productIds.length,
+        422,
+        "No repitas productos",
+      );
+
+      const result = await transaction(async (connection) => {
+        let total = 0;
+
+        // Valida el proveedor y calcula el importe en centavos.
+        for (const item of data.items) {
+          const [product] = await query(
+            `
+              SELECT id
+              FROM productos
+              WHERE id = ?
+                AND id_proveedor = ?
+            `,
+            [item.id_producto, data.id_proveedor],
+            connection,
+          );
+
+          ensure(
+            product,
+            422,
+            "El producto no corresponde al proveedor",
+          );
+
+          total += cents(item.costo_unitario) * item.cantidad;
+        }
+
+        const purchase = await query(
+          `
+            INSERT INTO compras (
+              id_proveedor,
+              id_usuario,
+              total
+            )
+            VALUES (?, ?, ?)
+          `,
           [
-            purchase.insertId,
-            item.id_producto,
-            item.cantidad,
-            item.costo_unitario,
+            data.id_proveedor,
+            req.user.id,
+            decimal(total),
           ],
           connection,
         );
-      }
 
-      return { id: purchase.insertId };
-    });
+        for (const item of data.items) {
+          await query(
+            `
+              INSERT INTO detalle_compras (
+                id_compra,
+                id_producto,
+                cantidad,
+                costo_unitario
+              )
+              VALUES (?, ?, ?, ?)
+            `,
+            [
+              purchase.insertId,
+              item.id_producto,
+              item.cantidad,
+              item.costo_unitario,
+            ],
+            connection,
+          );
+        }
 
-    ok(res, result, 201);
-  });
+        return {
+          id: purchase.insertId,
+        };
+      });
 
+      ok(res, result, 201);
+    },
+  );
+
+  // Controla los cambios de estado de las compras.
   app.patch(
     "/purchases/:id",
     roles("ADMIN", "INVENTARIO"),
@@ -123,17 +168,23 @@ export function purchaseRoutes(app) {
 
       const result = await transaction(async (connection) => {
         const [purchase] = await query(
-          `SELECT *
-           FROM compras
-           WHERE id = ?
-           FOR UPDATE`,
+          `
+            SELECT *
+            FROM compras
+            WHERE id = ?
+            FOR UPDATE
+          `,
           [purchaseId],
           connection,
         );
 
-        ensure(purchase, 404, "Compra no encontrada");
+        ensure(
+          purchase,
+          404,
+          "Compra no encontrada",
+        );
 
-        const allowed = {
+        const allowedTransitions = {
           borrador: ["confirmada", "cancelada"],
           confirmada: ["recibida", "cancelada"],
           recibida: [],
@@ -141,18 +192,21 @@ export function purchaseRoutes(app) {
         };
 
         ensure(
-          allowed[purchase.estado]?.includes(status) ?? false,
+          allowedTransitions[purchase.estado]?.includes(status) ??
+            false,
           409,
           "Cambio de estado no permitido",
         );
 
-        // Actualiza el inventario únicamente al recibir la compra.
+        // El inventario aumenta únicamente cuando se recibe la compra.
         if (status === "recibida") {
           const lines = await query(
-            `SELECT *
-             FROM detalle_compras
-             WHERE id_compra = ?
-             ORDER BY id_producto`,
+            `
+              SELECT *
+              FROM detalle_compras
+              WHERE id_compra = ?
+              ORDER BY id_producto
+            `,
             [purchaseId],
             connection,
           );
@@ -164,15 +218,19 @@ export function purchaseRoutes(app) {
               line.cantidad,
               req.user.id,
               "Recepción de compra",
-              { compra: purchaseId },
+              {
+                compra: purchaseId,
+              },
             );
           }
         }
 
         await query(
-          `UPDATE compras
-           SET estado = ?
-           WHERE id = ?`,
+          `
+            UPDATE compras
+            SET estado = ?
+            WHERE id = ?
+          `,
           [status, purchaseId],
           connection,
         );
@@ -187,24 +245,27 @@ export function purchaseRoutes(app) {
     },
   );
 
+  // Consulta las devoluciones realizadas a proveedores.
   app.get(
     "/supplier-returns",
     roles("ADMIN", "INVENTARIO"),
     async (_req, res) => {
-      const returns = await query(
-        `SELECT
+      const returns = await query(`
+        SELECT
           d.*,
           p.nombre
-        FROM devoluciones_compra d
-        JOIN productos p ON p.id = d.id_producto
+        FROM devoluciones_compra AS d
+        INNER JOIN productos AS p
+          ON p.id = d.id_producto
         ORDER BY d.id DESC
-        LIMIT 500`,
-      );
+        LIMIT 500
+      `);
 
       ok(res, returns);
     },
   );
 
+  // Registra una devolución y descuenta las unidades del inventario.
   app.post(
     "/supplier-returns",
     roles("ADMIN", "INVENTARIO"),
@@ -220,10 +281,12 @@ export function purchaseRoutes(app) {
 
       const result = await transaction(async (connection) => {
         const [purchase] = await query(
-          `SELECT *
-           FROM compras
-           WHERE id = ?
-           FOR UPDATE`,
+          `
+            SELECT *
+            FROM compras
+            WHERE id = ?
+            FOR UPDATE
+          `,
           [data.id_compra],
           connection,
         );
@@ -235,27 +298,44 @@ export function purchaseRoutes(app) {
         );
 
         const [detail] = await query(
-          `SELECT cantidad
-           FROM detalle_compras
-           WHERE id_compra = ? AND id_producto = ?`,
-          [data.id_compra, data.id_producto],
+          `
+            SELECT cantidad
+            FROM detalle_compras
+            WHERE id_compra = ?
+              AND id_producto = ?
+          `,
+          [
+            data.id_compra,
+            data.id_producto,
+          ],
           connection,
         );
 
-        ensure(detail, 404, "Producto no encontrado en la compra");
+        ensure(
+          detail,
+          404,
+          "Producto no encontrado en la compra",
+        );
 
         const [returned] = await query(
-          `SELECT
-            COALESCE(SUM(cantidad), 0) AS total
-           FROM devoluciones_compra
-           WHERE id_compra = ? AND id_producto = ?`,
-          [data.id_compra, data.id_producto],
+          `
+            SELECT
+              COALESCE(SUM(cantidad), 0) AS total
+            FROM devoluciones_compra
+            WHERE id_compra = ?
+              AND id_producto = ?
+          `,
+          [
+            data.id_compra,
+            data.id_producto,
+          ],
           connection,
         );
 
         // Impide devolver más unidades de las adquiridas.
         ensure(
-          Number(returned.total) + data.cantidad <= detail.cantidad,
+          Number(returned.total) + data.cantidad <=
+            Number(detail.cantidad),
           409,
           "La devolución excede las unidades compradas",
         );
@@ -266,18 +346,33 @@ export function purchaseRoutes(app) {
           -data.cantidad,
           req.user.id,
           "Devolución a proveedor",
-          { compra: data.id_compra },
+          {
+            compra: data.id_compra,
+          },
         );
 
         const result = await query(
-          `INSERT INTO devoluciones_compra
-            (id_compra, id_producto, cantidad, motivo)
-           VALUES (?, ?, ?, ?)`,
-          [data.id_compra, data.id_producto, data.cantidad, data.motivo],
+          `
+            INSERT INTO devoluciones_compra (
+              id_compra,
+              id_producto,
+              cantidad,
+              motivo
+            )
+            VALUES (?, ?, ?, ?)
+          `,
+          [
+            data.id_compra,
+            data.id_producto,
+            data.cantidad,
+            data.motivo,
+          ],
           connection,
         );
 
-        return { id: result.insertId };
+        return {
+          id: result.insertId,
+        };
       });
 
       ok(res, result, 201);
