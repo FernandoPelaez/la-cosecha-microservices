@@ -44,6 +44,7 @@ COPY package.json ./
 COPY packages ./packages
 COPY services ./services
 COPY scripts ./scripts
+COPY database ./database
 
 # Preparar los microservicios .NET.
 RUN dotnet restore \
