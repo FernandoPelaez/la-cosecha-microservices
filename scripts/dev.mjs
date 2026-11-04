@@ -4,7 +4,9 @@ import path from "node:path";
 import { services } from "./service-registry.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+
 const production = process.argv.includes("--production");
+
 const preview =
   process.env.SITES_MANAGED_LINUX_CONTAINER === "1" ||
   process.argv.includes("--strictPort");
@@ -90,6 +92,7 @@ if (!webOnly) {
             : "development",
     };
 
+    // Microservicios Node.js.
     if (service.technology === "node") {
       start(
         service.name,
@@ -103,6 +106,7 @@ if (!webOnly) {
       );
     }
 
+    // Microservicios Flask.
     if (service.technology === "flask") {
       start(
         service.name,
@@ -120,6 +124,7 @@ if (!webOnly) {
       );
     }
 
+    // Microservicios FastAPI.
     if (service.technology === "fastapi") {
       start(
         service.name,
@@ -141,29 +146,59 @@ if (!webOnly) {
       );
     }
 
+    // Microservicios .NET.
     if (service.technology === "dotnet") {
-      start(
-        service.name,
-        process.env.DOTNET_EXECUTABLE || "dotnet",
-        [
-          "run",
-          "--project",
-          `services/${service.name}/${service.project}`,
-          "--no-launch-profile",
-          "--configuration",
-          production ? "Release" : "Debug",
-        ],
-        {
-          env: {
-            ...env,
-            [`${prefix}_PORT`]: port,
+      const executable =
+        process.env.DOTNET_EXECUTABLE || "dotnet";
+
+      const serviceEnv = {
+        ...env,
+        [`${prefix}_PORT`]: port,
+      };
+
+      if (process.platform === "win32") {
+        // Ejecutar las DLL compiladas para evitar el bloqueo
+        // de archivos .exe por las políticas de Windows.
+        const projectDir = path.join(
+          root,
+          "services",
+          service.name,
+        );
+
+        const assembly = path.join(
+          projectDir,
+          "bin",
+          "Release",
+          "net10.0",
+          service.project.replace(/\.csproj$/i, ".dll"),
+        );
+
+        start(service.name, executable, [assembly], {
+          cwd: projectDir,
+          env: serviceEnv,
+        });
+      } else {
+        // Conservar el inicio existente para Linux.
+        start(
+          service.name,
+          executable,
+          [
+            "run",
+            "--project",
+            `services/${service.name}/${service.project}`,
+            "--no-launch-profile",
+            "--configuration",
+            production ? "Release" : "Debug",
+          ],
+          {
+            env: serviceEnv,
           },
-        },
-      );
+        );
+      }
     }
   }
 
-  // Mantener el proceso de entrega de comprobantes.
+  // Mantener la entrega de comprobantes.
   start("comprobantes", process.execPath, [
     "scripts/deliver-receipts.mjs",
     "--watch",
@@ -189,7 +224,7 @@ if (!webOnly) {
   }
 }
 
-// Iniciar Next.js únicamente cuando corresponda.
+// Iniciar el frontend cuando corresponda.
 if (!servicesOnly) {
   start(
     "web",
