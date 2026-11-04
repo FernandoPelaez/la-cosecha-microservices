@@ -8,33 +8,46 @@ const production = process.argv.includes("--production");
 const preview =
   process.env.SITES_MANAGED_LINUX_CONTAINER === "1" ||
   process.argv.includes("--strictPort");
+
 const argument = (name) => {
   const index = process.argv.indexOf(name);
   return index < 0 ? undefined : process.argv[index + 1];
 };
+
 const webOnly = process.argv.includes("--web-only") || preview;
 const servicesOnly = process.argv.includes("--services-only");
+
 const children = [];
 let stopping = false;
+
 function stop(code = 0) {
   if (stopping) return;
+
   stopping = true;
   process.exitCode = code;
-  for (const child of children) child.kill("SIGTERM");
+
+  for (const child of children) {
+    child.kill("SIGTERM");
+  }
 }
+
 function start(name, command, args, options = {}) {
   const child = spawn(command, args, {
     cwd: root,
     stdio: "inherit",
     ...options,
   });
+
   children.push(child);
+
   child.on("error", (error) => {
     console.error(
       `${name}: no se pudo iniciar (${error.code}). Ejecuta npm run setup y revisa .env.`,
     );
+
     stop(1);
   });
+
   child.on("exit", (code) => {
     if (!stopping && code !== 0) {
       console.error(`${name} terminó con código ${code}`);
@@ -42,19 +55,29 @@ function start(name, command, args, options = {}) {
     }
   });
 }
+
 process.on("SIGINT", () => stop());
 process.on("SIGTERM", () => stop());
+
 if (!webOnly) {
   const python =
     process.env.PYTHON_EXECUTABLE ||
     path.join(
       root,
       ".venv",
-      process.platform === "win32" ? "Scripts/python.exe" : "bin/python",
+      process.platform === "win32"
+        ? "Scripts/python.exe"
+        : "bin/python",
     );
+
+  // Iniciar los microservicios registrados.
   for (const service of services) {
     const prefix = service.env || service.name.toUpperCase();
-    const port = String(process.env[`${prefix}_PORT`] || service.port);
+
+    const port = String(
+      process.env[`${prefix}_PORT`] || service.port,
+    );
+
     const env = {
       ...process.env,
       PORT: port,
@@ -66,21 +89,38 @@ if (!webOnly) {
             ? "production"
             : "development",
     };
-    if (service.technology === "node")
+
+    if (service.technology === "node") {
       start(
         service.name,
         process.execPath,
-        ["--import", "tsx", `services/${service.name}/server.mjs`],
+        [
+          "--import",
+          "tsx",
+          `services/${service.name}/server.mjs`,
+        ],
         { env },
       );
-    if (service.technology === "flask")
+    }
+
+    if (service.technology === "flask") {
       start(
         service.name,
         python,
-        ["-m", "waitress", `--listen=127.0.0.1:${port}`, "app:app"],
-        { cwd: path.join(root, "services", service.name), env },
+        [
+          "-m",
+          "waitress",
+          `--listen=127.0.0.1:${port}`,
+          "app:app",
+        ],
+        {
+          cwd: path.join(root, "services", service.name),
+          env,
+        },
       );
-    if (service.technology === "fastapi")
+    }
+
+    if (service.technology === "fastapi") {
       start(
         service.name,
         python,
@@ -94,9 +134,14 @@ if (!webOnly) {
           port,
           "--no-access-log",
         ],
-        { cwd: path.join(root, "services", service.name), env },
+        {
+          cwd: path.join(root, "services", service.name),
+          env,
+        },
       );
-    if (service.technology === "dotnet")
+    }
+
+    if (service.technology === "dotnet") {
       start(
         service.name,
         process.env.DOTNET_EXECUTABLE || "dotnet",
@@ -108,15 +153,44 @@ if (!webOnly) {
           "--configuration",
           production ? "Release" : "Debug",
         ],
-        { env: { ...env, [`${prefix}_PORT`]: port } },
+        {
+          env: {
+            ...env,
+            [`${prefix}_PORT`]: port,
+          },
+        },
       );
+    }
   }
+
+  // Mantener el proceso de entrega de comprobantes.
   start("comprobantes", process.execPath, [
     "scripts/deliver-receipts.mjs",
     "--watch",
   ]);
+
+  // Iniciar el API Gateway únicamente en producción.
+  if (production) {
+    const gatewayPort =
+      process.env.GATEWAY_PORT ||
+      (servicesOnly ? process.env.PORT || "8080" : "8080");
+
+    start(
+      "gateway",
+      process.execPath,
+      ["scripts/gateway.mjs"],
+      {
+        env: {
+          ...process.env,
+          GATEWAY_PORT: gatewayPort,
+        },
+      },
+    );
+  }
 }
-if (!servicesOnly)
+
+// Iniciar Next.js únicamente cuando corresponda.
+if (!servicesOnly) {
   start(
     "web",
     process.execPath,
@@ -125,9 +199,14 @@ if (!servicesOnly)
       production ? "start" : "dev",
       ...(!production ? ["--webpack"] : []),
       "--hostname",
-      argument("--host") || (preview ? "0.0.0.0" : "127.0.0.1"),
+      argument("--host") ||
+        (preview ? "0.0.0.0" : "127.0.0.1"),
       "--port",
       argument("--port") || process.env.PORT || "3000",
     ],
-    { cwd: path.join(root, "apps/web") },
+    {
+      cwd: path.join(root, "apps/web"),
+    },
   );
+}
+
