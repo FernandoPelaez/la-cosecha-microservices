@@ -45,7 +45,11 @@ for (const service of services) {
 
   if (state.proceso === "activo") {
     try {
-      const response = await fetch(`${base}/health`, {
+      // El servicio de proveedores utiliza una ruta de salud diferente.
+      const healthPath =
+        service.name === "suppliers" ? "/api/health" : "/health";
+
+      const response = await fetch(`${base}${healthPath}`, {
         headers: {
           "X-Service-Key": process.env.SERVICE_KEY || "",
         },
@@ -70,4 +74,3 @@ for (const service of services) {
 
   console.log(JSON.stringify(state));
 }
-
