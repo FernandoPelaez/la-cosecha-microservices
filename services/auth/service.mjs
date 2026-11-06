@@ -68,7 +68,11 @@ export async function registrar(data) {
       c,
     );
 
-    await query("INSERT INTO clientes(id_usuario) VALUES (?)", [r.insertId], c);
+    await query(
+      "INSERT INTO clientes(id_usuario) VALUES (?)",
+      [r.insertId],
+      c,
+    );
   });
 
   const u = await buscarUsuario(data.correo);
@@ -84,5 +88,6 @@ export async function registrar(data) {
   return {
     user: datosPublicos(u),
     mailSent,
+    token: await signSession(u),
   };
 }

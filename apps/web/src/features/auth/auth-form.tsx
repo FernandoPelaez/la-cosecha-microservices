@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, ArrowRightToLine, ShieldCheck } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowRightToLine,
+  ShieldCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 import { AuthField } from "./auth-field";
 import { Turnstile } from "./turnstile";
 import { useAuthForm, type AuthMode } from "./use-auth-form";
@@ -36,6 +39,7 @@ export function AuthForm({
   } = useAuthForm(mode, token);
 
   const bot = ["login", "register", "recover"].includes(mode);
+  const uprightProduct = mode === "login" || mode === "register";
 
   return (
     <div className="shell">
@@ -45,20 +49,27 @@ export function AuthForm({
             <p className="eyebrow">DE NUESTRA TIERRA A TU MESA</p>
             <h2>Tu próxima comida merece este toque.</h2>
           </div>
+
           <Image
             src="/images/la_cosecha_salsa_01.png"
             alt="Salsa Macha con Ajo"
             width={320}
             height={360}
+            className={uprightProduct ? "auth-product-upright" : undefined}
           />
+
           <p>
             Elige tus salsas. Guarda tus domicilios.
             <br />
             Sigue cada pedido desde un mismo lugar.
           </p>
         </div>
+
         <div className="auth-form-panel">
-          <p className="eyebrow mb-3">TU ESPACIO EN LA COSECHA</p>
+          <p className="eyebrow mb-3">
+            TU ESPACIO EN LA COSECHA
+          </p>
+
           <h1
             className={
               mode === "register"
@@ -83,25 +94,80 @@ export function AuthForm({
                 : mode === "recover"
                   ? "Te enviaremos un enlace para restablecer tu contraseña."
                   : mode === "verify"
-                    ? "Pulsa el botón para confirmar que este correo te pertenece."
+                    ? "Estamos comprobando tu dirección de correo electrónico."
                     : "Usa al menos 12 caracteres."}
           </p>
 
-          {message ? (
+          {mode === "verify" ? (
+            <div className="space-y-4" aria-live="polite">
+              {message ? (
+                <div role="status">
+                  <ShieldCheck
+                    className="mb-3 text-(--action-buy)"
+                    size={32}
+                    strokeWidth={1.7}
+                    aria-hidden="true"
+                  />
+
+                  <p className="text-sm leading-6">
+                    {message}
+                  </p>
+
+                  <Link
+                    href="/"
+                    className="link mt-5 inline-block"
+                  >
+                    Ir a la tienda
+                  </Link>
+                </div>
+              ) : error ? (
+                <div>
+                  <p
+                    role="alert"
+                    className="text-sm leading-6 text-(--action-danger)"
+                  >
+                    {error}
+                  </p>
+
+                  <Link
+                    href="/cuenta"
+                    className="link mt-5 inline-block"
+                  >
+                    Ir a mi cuenta
+                  </Link>
+                </div>
+              ) : (
+                <p
+                  role="status"
+                  className="text-sm leading-6 text-(--text-secondary)"
+                >
+                  Verificando tu correo...
+                </p>
+              )}
+            </div>
+          ) : message ? (
             <div role="status">
               <ShieldCheck
                 className="mb-3 text-(--action-buy)"
                 aria-hidden="true"
               />
 
-              <p className="text-sm leading-6">{message}</p>
+              <p className="text-sm leading-6">
+                {message}
+              </p>
 
-              <Link href="/iniciar-sesion" className="link mt-5 inline-block">
+              <Link
+                href="/iniciar-sesion"
+                className="link mt-5 inline-block"
+              >
                 Ir a iniciar sesión
               </Link>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
               {mode === "register" && (
                 <>
                   <AuthField
@@ -164,11 +230,18 @@ export function AuthForm({
               )}
 
               {bot && (
-                <Turnstile key={reset} action={mode} onToken={setBotToken} />
+                <Turnstile
+                  key={reset}
+                  action={mode}
+                  onToken={setBotToken}
+                />
               )}
 
               {error && (
-                <p role="alert" className="text-sm text-(--action-danger)">
+                <p
+                  role="alert"
+                  className="text-sm text-(--action-danger)"
+                >
                   {error}
                 </p>
               )}
@@ -186,9 +259,7 @@ export function AuthForm({
                     ? "Crear cuenta"
                     : mode === "recover"
                       ? "Enviar enlace"
-                      : mode === "verify"
-                        ? "Confirmar correo"
-                        : "Guardar contraseña"}
+                      : "Guardar contraseña"}
 
                 {mode === "login" ? (
                   <ArrowRightToLine
@@ -197,17 +268,26 @@ export function AuthForm({
                     aria-hidden="true"
                   />
                 ) : (
-                  <ArrowRight size={17} aria-hidden="true" />
+                  <ArrowRight
+                    size={17}
+                    aria-hidden="true"
+                  />
                 )}
               </Button>
 
               {mode === "login" && (
                 <div className="flex flex-wrap justify-between gap-3 pt-2 text-xs">
-                  <Link href="/recuperar" className="link">
+                  <Link
+                    href="/recuperar"
+                    className="link"
+                  >
                     Olvidé mi contraseña
                   </Link>
 
-                  <Link href="/registro" className="link">
+                  <Link
+                    href="/registro"
+                    className="link"
+                  >
                     Crear cuenta
                   </Link>
                 </div>
@@ -216,7 +296,10 @@ export function AuthForm({
               {mode === "register" && (
                 <p className="pt-1 text-center text-sm">
                   ¿Ya tienes cuenta?{" "}
-                  <Link href="/iniciar-sesion" className="link">
+                  <Link
+                    href="/iniciar-sesion"
+                    className="link"
+                  >
                     Iniciar sesión
                   </Link>
                 </p>

@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/components/providers";
 import { useFeedback } from "@/components/ui/feedback";
@@ -26,10 +31,47 @@ export function useAuthForm(mode: AuthMode, token: string) {
   const [message, setMessage] = useState("");
   const [reset, setReset] = useState(0);
 
+  const verificationAttempt = useRef<string | null>(null);
+
+  // Verificar automáticamente el correo al abrir el enlace.
+  useEffect(() => {
+    if (mode !== "verify") return;
+
+    if (!/^[a-f0-9]{64}$/.test(token)) {
+      setError("El enlace de verificación no es válido.");
+      return;
+    }
+
+    // Evitar solicitudes duplicadas.
+    if (verificationAttempt.current === token) return;
+
+    verificationAttempt.current = token;
+
+    setBusy(true);
+    setError("");
+    setMessage("");
+
+    async function verifyEmail() {
+      try {
+        await send("auth/verify", "POST", { token });
+
+        await refreshUser();
+
+        setMessage("Tu correo se verificó correctamente.");
+      } catch (cause) {
+        setError((cause as Error).message);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    void verifyEmail();
+  }, [mode, token, refreshUser]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (busy) return;
+    if (busy || mode === "verify") return;
 
     setBusy(true);
     setError("");
@@ -38,17 +80,20 @@ export function useAuthForm(mode: AuthMode, token: string) {
     const data = Object.fromEntries(new FormData(event.currentTarget));
 
     try {
-      const result = await send<AuthResponse>(`auth/${mode}`, "POST", {
-        ...data,
-        botToken,
-        token,
-      });
+      const result = await send<AuthResponse>(
+        `auth/${mode}`,
+        "POST",
+        {
+          ...data,
+          botToken,
+          token,
+        },
+      );
 
       if (mode === "login") {
         // Sincronizar la sesión antes de navegar.
         await refreshUser();
 
-        // Redirigir según el rol recibido del servidor.
         const destination =
           result.rol && result.rol !== "CLIENTE"
             ? "/admin"
@@ -57,16 +102,25 @@ export function useAuthForm(mode: AuthMode, token: string) {
         router.push(destination);
         router.refresh();
       } else if (mode === "register") {
-        setMessage(
-          result.mailSent
-            ? "Tu cuenta está creada. Revisa tu correo para verificarla."
-            : "Tu cuenta está creada. El correo de verificación no pudo enviarse; podrás solicitarlo desde tu cuenta.",
-        );
+        // Sincronizar la sesión creada durante el registro.
+        await refreshUser();
+
+        if (result.mailSent) {
+          notify(
+            "Tu cuenta está lista. Revisa tu correo para verificarla.",
+          );
+        } else {
+          notify(
+            "Tu cuenta está creada, pero no se pudo enviar el correo de verificación.",
+            true,
+          );
+        }
+
+        // Entrar directamente a la tienda.
+        router.replace("/");
+        router.refresh();
       } else if (mode === "recover") {
         setMessage(result.message || "Revisa tu correo.");
-      } else if (mode === "verify") {
-        setMessage("Correo confirmado correctamente.");
-        void refreshUser();
       } else {
         notify("Contraseña actualizada correctamente");
         router.push("/iniciar-sesion");

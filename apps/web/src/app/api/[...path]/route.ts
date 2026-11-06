@@ -115,9 +115,22 @@ async function handle(
             }
           : { ...raw, data };
 
-      if (route === "auth/login" && upstream.ok) {
+      // Crear la sesión al iniciar sesión o registrar una cuenta.
+      if (
+        upstream.ok &&
+        (route === "auth/login" || route === "auth/register")
+      ) {
+        const registration = route === "auth/register";
+
         response = NextResponse.json(
-          { data: data.user },
+          {
+            data: registration
+              ? {
+                  user: data.user,
+                  mailSent: data.mailSent,
+                }
+              : data.user,
+          },
           { status: upstream.status },
         );
 
@@ -182,4 +195,3 @@ export {
   handle as PATCH,
   handle as DELETE,
 };
-

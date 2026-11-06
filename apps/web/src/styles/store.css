@@ -625,6 +625,10 @@
   transform: rotate(-8deg);
 }
 
+.auth-art img.auth-product-upright {
+  transform: none;
+}
+
 .auth-art > p {
   font-size: 11px;
   color: var(--text-secondary);
