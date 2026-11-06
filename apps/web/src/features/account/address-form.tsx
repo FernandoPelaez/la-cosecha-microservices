@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Save, X } from "lucide-react";
 import type { Address } from "@/types";
-import { send, ApiError } from "@/lib/api";
+import { api, send, ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { useFeedback } from "@/components/ui/feedback";
 
@@ -13,68 +13,136 @@ interface AddressFormProps {
   onCancel: () => void;
 }
 
-// Campos existentes y sus límites de longitud.
-const ADDRESS_FIELDS = [
-  {
-    key: "calle_numero",
-    label: "Calle y número",
-    maxLength: 255,
-  },
-  {
-    key: "colonia",
-    label: "Colonia",
-    maxLength: 150,
-  },
-  {
-    key: "ciudad",
-    label: "Ciudad",
-    maxLength: 150,
-  },
-  {
-    key: "codigo_postal",
-    label: "Código postal",
-    maxLength: 5,
-  },
-] as const;
+interface PostalCodeResult {
+  codigo_postal: string;
+  ciudad: string;
+  estado: string;
+  colonias: string[];
+}
 
-// Estilos compartidos de los campos.
-// El modificador ! evita el contorno azul definido en brand.css.
-const BASE_FIELD_CLASS =
-  "w-full min-w-0 rounded-xl border border-(--border) bg-(--surface) text-sm text-(--text-primary) outline-none focus:border-(--brand-secondary) focus-visible:outline-none! autofill:shadow-[inset_0_0_0_1000px_var(--surface)]";
+type PostalStatus = "idle" | "loading" | "valid" | "error";
 
-const INPUT_CLASS = `${BASE_FIELD_CLASS} h-11 px-3.5`;
+const INPUT_CLASS =
+  "h-10 w-full min-w-0 rounded-lg border border-(--border) bg-(--surface) px-3 text-base text-(--text-primary) outline-none focus:border-(--brand-secondary) focus-visible:outline-none! disabled:cursor-not-allowed disabled:opacity-70 sm:text-sm";
 
-const TEXTAREA_CLASS =
-  `${BASE_FIELD_CLASS} min-h-20 resize-y px-3.5 py-3`;
+const LABEL_CLASS =
+  "mb-1.5 block text-sm font-medium text-(--text-primary)";
 
 export function AddressForm({
   value,
   onSaved,
   onCancel,
 }: AddressFormProps) {
+  const { notify } = useFeedback();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [fields, setFields] = useState<Record<string, string>>({});
 
-  const [fields, setFields] = useState<
-    Record<string, string>
-  >({});
+  const [codigoPostal, setCodigoPostal] = useState(
+    value?.codigo_postal ?? "",
+  );
+  const [colonia, setColonia] = useState(value?.colonia ?? "");
+  const [ciudad, setCiudad] = useState("");
+  const [colonias, setColonias] = useState<string[]>([]);
+  const [postalStatus, setPostalStatus] = useState<PostalStatus>("idle");
+  const [postalError, setPostalError] = useState("");
 
-  const { notify } = useFeedback();
+  // Consulta el código postal y descarta respuestas de búsquedas anteriores.
+  useEffect(() => {
+    if (!/^\d{5}$/.test(codigoPostal)) return;
 
-  // Mantiene las operaciones originales de registro y edición.
+    const controller = new AbortController();
+    setPostalStatus("loading");
+    setPostalError("");
+
+    const timer = window.setTimeout(async () => {
+      try {
+        const result = await api<PostalCodeResult>(
+          `addresses/postal-code/${codigoPostal}`,
+          { signal: controller.signal },
+        );
+
+        if (
+          result.codigo_postal !== codigoPostal ||
+          result.ciudad !== "Los Mochis" ||
+          !Array.isArray(result.colonias) ||
+          result.colonias.length === 0
+        ) {
+          throw new Error("No se pudo validar este código postal.");
+        }
+
+        if (controller.signal.aborted) return;
+
+        setColonias(result.colonias);
+        setCiudad(result.ciudad);
+        setColonia((actual) => {
+          const coincidencia = result.colonias.find(
+            (nombre) =>
+              nombre.localeCompare(actual, "es-MX", {
+                sensitivity: "base",
+              }) === 0,
+          );
+
+          return coincidencia ??
+            (result.colonias.length === 1 ? result.colonias[0] : "");
+        });
+        setPostalStatus("valid");
+      } catch (cause) {
+        if (controller.signal.aborted) return;
+
+        setColonias([]);
+        setColonia("");
+        setCiudad("");
+        setPostalStatus("error");
+        setPostalError(
+          cause instanceof Error
+            ? cause.message
+            : "No se pudo consultar el código postal.",
+        );
+      }
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [codigoPostal]);
+
+  function cambiarCodigoPostal(valor: string) {
+    const siguiente = valor.replace(/\D/g, "").slice(0, 5);
+    if (siguiente === codigoPostal) return;
+
+    setCodigoPostal(siguiente);
+    setColonia("");
+    setCiudad("");
+    setColonias([]);
+    setPostalStatus("idle");
+    setPostalError("");
+    setError("");
+    setFields({});
+  }
+
+  // Conserva el alta y la edición existentes; el backend valida la cobertura.
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     if (busy) return;
+
+    if (postalStatus !== "valid" || !colonia) {
+      setError("Valida el código postal y selecciona una colonia.");
+      return;
+    }
 
     setBusy(true);
     setError("");
     setFields({});
 
     try {
-      const data = Object.fromEntries(
-        new FormData(event.currentTarget),
-      );
+      const data = {
+        ...Object.fromEntries(new FormData(event.currentTarget)),
+        codigo_postal: codigoPostal,
+        colonia,
+        ciudad,
+      };
 
       await send(
         value ? `addresses/${value.id}` : "addresses",
@@ -87,162 +155,198 @@ export function AddressForm({
           ? "Domicilio actualizado correctamente"
           : "Domicilio registrado correctamente",
       );
-
       onSaved();
-    } catch (error) {
-      setError((error as Error).message);
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "No se pudo guardar el domicilio.",
+      );
 
-      if (error instanceof ApiError) {
-        setFields(error.fields);
+      if (cause instanceof ApiError) {
+        setFields(cause.fields);
       }
     } finally {
       setBusy(false);
     }
   }
 
+  const puedeGuardar = postalStatus === "valid" && Boolean(colonia);
+
   return (
     <form
       onSubmit={submit}
-      className="min-w-0 px-4 py-5 sm:px-6 sm:py-6"
+      className="w-full max-w-xl min-w-0 px-3 py-4 sm:px-5 sm:py-5"
     >
-      {/* Una columna en móvil y dos desde 640 px. */}
-      <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2">
-        {ADDRESS_FIELDS.map((field) => {
-          const fieldError = fields[field.key];
-          const inputId = `address-${field.key}`;
-          const errorId = `${inputId}-error`;
+      <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
+        <div className="min-w-0">
+          <label htmlFor="address-codigo-postal" className={LABEL_CLASS}>
+            Código postal <span className="text-(--action-danger)">*</span>
+          </label>
+          <input
+            id="address-codigo-postal"
+            name="codigo_postal"
+            type="text"
+            inputMode="numeric"
+            autoComplete="postal-code"
+            maxLength={5}
+            pattern="[0-9]{5}"
+            required
+            value={codigoPostal}
+            onChange={(event) => cambiarCodigoPostal(event.target.value)}
+            aria-invalid={Boolean(postalError || fields.codigo_postal)}
+            aria-describedby={
+              postalError || fields.codigo_postal || postalStatus === "loading"
+                ? "address-codigo-postal-status"
+                : undefined
+            }
+            className={INPUT_CLASS}
+          />
+          {(postalStatus === "loading" ||
+            postalError ||
+            fields.codigo_postal) && (
+            <p
+              id="address-codigo-postal-status"
+              role={postalError || fields.codigo_postal ? "alert" : "status"}
+              className={`mt-1 text-xs ${
+                postalError || fields.codigo_postal
+                  ? "text-(--action-danger)"
+                  : "text-(--text-secondary)"
+              }`}
+            >
+              {postalError ||
+                fields.codigo_postal ||
+                "Consultando código postal..."}
+            </p>
+          )}
+        </div>
 
-          return (
-            <div key={field.key} className="min-w-0">
-              <label
-                htmlFor={inputId}
-                className="mb-1.5 block text-sm font-semibold text-(--text-primary)"
-              >
-                {field.label}
+        <div className="min-w-0">
+          <label htmlFor="address-ciudad" className={LABEL_CLASS}>
+            Ciudad <span className="text-(--action-danger)">*</span>
+          </label>
+          <input
+            id="address-ciudad"
+            name="ciudad"
+            type="text"
+            value={ciudad}
+            readOnly
+            required
+            placeholder="Se completa automáticamente"
+            aria-invalid={Boolean(fields.ciudad)}
+            className={`${INPUT_CLASS} read-only:cursor-default`}
+          />
+          {fields.ciudad && (
+            <p className="mt-1 text-xs text-(--action-danger)">
+              {fields.ciudad}
+            </p>
+          )}
+        </div>
 
-                <span
-                  aria-hidden="true"
-                  className="ml-1 text-(--action-danger)"
-                >
-                  *
-                </span>
-              </label>
+        <div className="min-w-0">
+          <label htmlFor="address-colonia" className={LABEL_CLASS}>
+            Colonia <span className="text-(--action-danger)">*</span>
+          </label>
+          <select
+            id="address-colonia"
+            name="colonia"
+            value={colonia}
+            onChange={(event) => {
+              setColonia(event.target.value);
+              setError("");
+            }}
+            disabled={postalStatus !== "valid"}
+            required
+            aria-invalid={Boolean(fields.colonia)}
+            className={INPUT_CLASS}
+          >
+            <option value="">Selecciona una colonia</option>
+            {colonias.map((nombre) => (
+              <option key={nombre} value={nombre}>
+                {nombre}
+              </option>
+            ))}
+          </select>
+          {fields.colonia && (
+            <p className="mt-1 text-xs text-(--action-danger)">
+              {fields.colonia}
+            </p>
+          )}
+        </div>
 
-              <input
-                id={inputId}
-                name={field.key}
-                type="text"
-                defaultValue={String(
-                  value?.[field.key as keyof Address] ?? "",
-                )}
-                maxLength={field.maxLength}
-                required
-                inputMode={
-                  field.key === "codigo_postal"
-                    ? "numeric"
-                    : "text"
-                }
-                pattern={
-                  field.key === "codigo_postal"
-                    ? "[0-9]{5}"
-                    : undefined
-                }
-                aria-invalid={Boolean(fieldError)}
-                aria-describedby={
-                  fieldError ? errorId : undefined
-                }
-                className={INPUT_CLASS}
-              />
-
-              {fieldError && (
-                <p
-                  id={errorId}
-                  className="mt-1.5 text-xs text-(--action-danger)"
-                >
-                  {fieldError}
-                </p>
-              )}
-            </div>
-          );
-        })}
+        <div className="min-w-0">
+          <label htmlFor="address-calle-numero" className={LABEL_CLASS}>
+            Calle y número <span className="text-(--action-danger)">*</span>
+          </label>
+          <input
+            id="address-calle-numero"
+            name="calle_numero"
+            type="text"
+            autoComplete="street-address"
+            defaultValue={value?.calle_numero ?? ""}
+            maxLength={255}
+            required
+            aria-invalid={Boolean(fields.calle_numero)}
+            className={INPUT_CLASS}
+          />
+          {fields.calle_numero && (
+            <p className="mt-1 text-xs text-(--action-danger)">
+              {fields.calle_numero}
+            </p>
+          )}
+        </div>
       </div>
 
-      {/* Referencias opcionales del domicilio. */}
-      <div className="mt-4">
-        <label
-          htmlFor="address-referencias"
-          className="mb-1.5 block text-sm font-semibold text-(--text-primary)"
-        >
-          Referencias
-
-          <span className="ml-1 text-xs font-normal text-(--text-secondary)">
+      <div className="mt-3">
+        <label htmlFor="address-referencias" className={LABEL_CLASS}>
+          Referencias{" "}
+          <span className="font-normal text-(--text-secondary)">
             (opcional)
           </span>
         </label>
-
         <textarea
           id="address-referencias"
           name="referencias"
+          defaultValue={value?.referencias ?? ""}
           maxLength={1000}
-          defaultValue={value?.referencias || ""}
-          rows={3}
+          rows={2}
           aria-invalid={Boolean(fields.referencias)}
-          aria-describedby={
-            fields.referencias
-              ? "address-referencias-error"
-              : undefined
-          }
-          className={TEXTAREA_CLASS}
+          className={`${INPUT_CLASS} h-auto min-h-16 resize-y py-2`}
         />
-
         {fields.referencias && (
-          <p
-            id="address-referencias-error"
-            className="mt-1.5 text-xs text-(--action-danger)"
-          >
+          <p className="mt-1 text-xs text-(--action-danger)">
             {fields.referencias}
           </p>
         )}
       </div>
 
-      {/* Errores devueltos por el backend. */}
       {error && (
-        <p
-          role="alert"
-          className="mt-4 text-sm text-(--action-danger)"
-        >
+        <p role="alert" className="mt-3 text-sm text-(--action-danger)">
           {error}
         </p>
       )}
 
-      {/* Botones compactos: cancelar rojo y guardar azul. */}
-      <div className="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-(--border) pt-4">
+      <div className="mt-5 flex flex-wrap justify-end gap-2 border-t border-(--border) pt-4">
         <Button
           type="button"
           variant="cancel"
           size="compact"
+          className="whitespace-nowrap"
           disabled={busy}
           onClick={onCancel}
         >
-          <X
-            size={15}
-            strokeWidth={1.8}
-            aria-hidden="true"
-          />
+          <X size={15} strokeWidth={1.8} aria-hidden="true" />
           Cancelar
         </Button>
-
         <Button
           type="submit"
           variant="edit"
           size="compact"
+          className="whitespace-nowrap"
           busy={busy}
+          disabled={!puedeGuardar}
         >
-          <Save
-            size={15}
-            strokeWidth={1.8}
-            aria-hidden="true"
-          />
+          <Save size={15} strokeWidth={1.8} aria-hidden="true" />
           Guardar domicilio
         </Button>
       </div>
