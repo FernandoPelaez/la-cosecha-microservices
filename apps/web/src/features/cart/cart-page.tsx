@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, ShoppingBag } from "lucide-react";
-
 import type { CartLine } from "@/types";
 import { useStore } from "@/components/providers";
 import { useFeedback } from "@/components/ui/feedback";
 import { Button } from "@/components/ui/button";
 import { CartItem } from "./cart-item";
 import { CartSummary } from "./cart-summary";
+
+const PRODUCTS_PER_PAGE = 3;
 
 export function CartPage() {
   const {
@@ -24,6 +25,28 @@ export function CartPage() {
 
   const { notify, confirm } = useFeedback();
   const [busy, setBusy] = useState(false);
+  const [selectedPage, setSelectedPage] = useState(0);
+
+  // Paginación de los productos del carrito.
+  const items = cart?.items ?? [];
+  const totalPages = Math.ceil(items.length / PRODUCTS_PER_PAGE);
+
+  // Evita páginas inexistentes si se eliminan productos.
+  const currentPage = Math.min(
+    selectedPage,
+    Math.max(0, totalPages - 1),
+  );
+
+  useEffect(() => {
+    setSelectedPage((previous) =>
+      Math.min(previous, Math.max(0, totalPages - 1)),
+    );
+  }, [totalPages]);
+
+  const visibleItems = items.slice(
+    currentPage * PRODUCTS_PER_PAGE,
+    (currentPage + 1) * PRODUCTS_PER_PAGE,
+  );
 
   async function changeQuantity(id: number, quantity: number) {
     if (busy) return;
@@ -75,8 +98,7 @@ export function CartPage() {
     );
   }
 
-  const items = cart?.items ?? [];
-
+  // Los totales consideran todos los productos del carrito.
   const productCount = items.reduce(
     (sum, item) => sum + item.cantidad,
     0,
@@ -178,7 +200,7 @@ export function CartPage() {
               </p>
 
               <ul className="divide-y divide-(--border)">
-                {items.map((item) => (
+                {visibleItems.map((item) => (
                   <CartItem
                     key={item.id_producto}
                     item={item}
@@ -193,6 +215,43 @@ export function CartPage() {
                   />
                 ))}
               </ul>
+
+              {/* Indicadores de navegación entre páginas. */}
+              {totalPages > 1 && (
+                <nav
+                  aria-label="Páginas de productos del carrito"
+                  className="mt-2 flex flex-wrap items-center justify-center gap-1 border-t border-(--border) pt-3"
+                >
+                  {Array.from(
+                    { length: totalPages },
+                    (_, index) => {
+                      const isActive = index === currentPage;
+
+                      return (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => setSelectedPage(index)}
+                          aria-label={`Ver página ${index + 1} de ${totalPages}`}
+                          aria-current={
+                            isActive ? "page" : undefined
+                          }
+                          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brand-secondary)"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={`block h-1.5 rounded-full transition-all duration-200 ${
+                              isActive
+                                ? "w-6 bg-(--brand-secondary)"
+                                : "w-1.5 bg-(--border)"
+                            }`}
+                          />
+                        </button>
+                      );
+                    },
+                  )}
+                </nav>
+              )}
             </section>
 
             <CartSummary
