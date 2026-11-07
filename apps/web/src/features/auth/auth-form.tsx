@@ -23,10 +23,14 @@ const titles: Record<AuthMode, string> = {
 export function AuthForm({
   mode,
   token = "",
+  adminOnly = false,
 }: {
   mode: AuthMode;
   token?: string;
+  adminOnly?: boolean;
 }) {
+  const isAdminLogin = adminOnly && mode === "login";
+
   const {
     botToken,
     setBotToken,
@@ -36,7 +40,7 @@ export function AuthForm({
     message,
     reset,
     handleSubmit,
-  } = useAuthForm(mode, token);
+  } = useAuthForm(mode, token, isAdminLogin);
 
   const bot = ["login", "register", "recover"].includes(mode);
   const uprightProduct = mode === "login" || mode === "register";
@@ -44,30 +48,79 @@ export function AuthForm({
   return (
     <div className="shell">
       <div className="auth-layout">
-        <div className="auth-art" aria-label="Bienvenido a LA COSECHA">
-          <div>
-            <p className="eyebrow">DE NUESTRA TIERRA A TU MESA</p>
-            <h2>Tu próxima comida merece este toque.</h2>
-          </div>
+        <div
+          className="auth-art"
+          aria-label={
+            isAdminLogin
+              ? "Acceso administrativo de LA COSECHA"
+              : "Bienvenido a LA COSECHA"
+          }
+        >
+          {isAdminLogin ? (
+            <>
+              <div>
+                <p className="eyebrow">
+                  LA COSECHA · ADMINISTRACIÓN
+                </p>
 
-          <Image
-            src="/images/la_cosecha_salsa_01.png"
-            alt="Salsa Macha con Ajo"
-            width={320}
-            height={360}
-            className={uprightProduct ? "auth-product-upright" : undefined}
-          />
+                <h2>
+                  La gestión de tu tienda en un solo lugar.
+                </h2>
+              </div>
 
-          <p>
-            Elige tus salsas. Guarda tus domicilios.
-            <br />
-            Sigue cada pedido desde un mismo lugar.
-          </p>
+              <div className="flex justify-center py-10">
+                <div className="flex size-32 items-center justify-center rounded-full bg-white/70 text-(--brand-secondary)">
+                  <ShieldCheck
+                    size={70}
+                    strokeWidth={1.3}
+                    aria-hidden="true"
+                  />
+                </div>
+              </div>
+
+              <p>
+                Control de productos, inventario, pedidos,
+                ventas y operaciones administrativas.
+              </p>
+            </>
+          ) : (
+            <>
+              <div>
+                <p className="eyebrow">
+                  DE NUESTRA TIERRA A TU MESA
+                </p>
+
+                <h2>
+                  Tu próxima comida merece este toque.
+                </h2>
+              </div>
+
+              <Image
+                src="/images/la_cosecha_salsa_01.png"
+                alt="Salsa Macha con Ajo"
+                width={320}
+                height={360}
+                className={
+                  uprightProduct
+                    ? "auth-product-upright"
+                    : undefined
+                }
+              />
+
+              <p>
+                Elige tus salsas. Guarda tus domicilios.
+                <br />
+                Sigue cada pedido desde un mismo lugar.
+              </p>
+            </>
+          )}
         </div>
 
         <div className="auth-form-panel">
           <p className="eyebrow mb-3">
-            TU ESPACIO EN LA COSECHA
+            {isAdminLogin
+              ? "ÁREA ADMINISTRATIVA"
+              : "TU ESPACIO EN LA COSECHA"}
           </p>
 
           <h1
@@ -77,7 +130,9 @@ export function AuthForm({
                 : "font-display text-3xl text-(--text-primary)"
             }
           >
-            {titles[mode]}
+            {isAdminLogin
+              ? "Acceso administrativo"
+              : titles[mode]}
           </h1>
 
           <p
@@ -87,15 +142,17 @@ export function AuthForm({
                 : "mb-6 mt-3 text-sm leading-6 text-(--text-secondary)"
             }
           >
-            {mode === "login"
-              ? "Consulta tus pedidos y gestiona tu cuenta."
-              : mode === "register"
-                ? "Guarda tus domicilios y sigue tus compras desde una sola cuenta."
-                : mode === "recover"
-                  ? "Te enviaremos un enlace para restablecer tu contraseña."
-                  : mode === "verify"
-                    ? "Estamos comprobando tu dirección de correo electrónico."
-                    : "Usa al menos 12 caracteres."}
+            {isAdminLogin
+              ? "Ingresa con tu cuenta autorizada para administrar LA COSECHA."
+              : mode === "login"
+                ? "Consulta tus pedidos y gestiona tu cuenta."
+                : mode === "register"
+                  ? "Guarda tus domicilios y sigue tus compras desde una sola cuenta."
+                  : mode === "recover"
+                    ? "Te enviaremos un enlace para restablecer tu contraseña."
+                    : mode === "verify"
+                      ? "Estamos comprobando tu dirección de correo electrónico."
+                      : "Usa al menos 12 caracteres."}
           </p>
 
           {mode === "verify" ? (
@@ -194,7 +251,9 @@ export function AuthForm({
                 </>
               )}
 
-              {["login", "register", "recover"].includes(mode) && (
+              {["login", "register", "recover"].includes(
+                mode,
+              ) && (
                 <AuthField
                   name="correo"
                   type="email"
@@ -205,7 +264,9 @@ export function AuthForm({
                 />
               )}
 
-              {["login", "register", "reset"].includes(mode) && (
+              {["login", "register", "reset"].includes(
+                mode,
+              ) && (
                 <AuthField
                   name="password"
                   type="password"
@@ -221,7 +282,9 @@ export function AuthForm({
                       : "Mínimo 12 caracteres; combina palabras, números y símbolos."
                   }
                   autoComplete={
-                    mode === "login" ? "current-password" : "new-password"
+                    mode === "login"
+                      ? "current-password"
+                      : "new-password"
                   }
                   error={fields.password}
                   minLength={mode === "login" ? 1 : 12}
@@ -247,19 +310,23 @@ export function AuthForm({
               )}
 
               <Button
-                variant={mode === "recover" ? "send" : "save"}
+                variant={
+                  mode === "recover" ? "send" : "save"
+                }
                 busy={busy}
                 disabled={bot && !botToken}
                 type="submit"
                 className="w-full"
               >
-                {mode === "login"
-                  ? "Iniciar sesión"
-                  : mode === "register"
-                    ? "Crear cuenta"
-                    : mode === "recover"
-                      ? "Enviar enlace"
-                      : "Guardar contraseña"}
+                {isAdminLogin
+                  ? "Acceder al panel"
+                  : mode === "login"
+                    ? "Iniciar sesión"
+                    : mode === "register"
+                      ? "Crear cuenta"
+                      : mode === "recover"
+                        ? "Enviar enlace"
+                        : "Guardar contraseña"}
 
                 {mode === "login" ? (
                   <ArrowRightToLine
@@ -284,12 +351,21 @@ export function AuthForm({
                     Olvidé mi contraseña
                   </Link>
 
-                  <Link
-                    href="/registro"
-                    className="link"
-                  >
-                    Crear cuenta
-                  </Link>
+                  {isAdminLogin ? (
+                    <Link
+                      href="/iniciar-sesion"
+                      className="link"
+                    >
+                      Acceso para clientes
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/registro"
+                      className="link"
+                    >
+                      Crear cuenta
+                    </Link>
+                  )}
                 </div>
               )}
 

@@ -11,7 +11,12 @@ import { useStore } from "@/components/providers";
 import { useFeedback } from "@/components/ui/feedback";
 import { ApiError, send } from "@/lib/api";
 
-export type AuthMode = "login" | "register" | "recover" | "reset" | "verify";
+export type AuthMode =
+  | "login"
+  | "register"
+  | "recover"
+  | "reset"
+  | "verify";
 
 type AuthResponse = {
   mailSent?: boolean;
@@ -19,11 +24,16 @@ type AuthResponse = {
   rol?: string;
 };
 
-// Administra el estado y las acciones de los flujos de autenticación.
-export function useAuthForm(mode: AuthMode, token: string) {
+// Centraliza la autenticación de clientes y administradores.
+export function useAuthForm(
+  mode: AuthMode,
+  token: string,
+  adminOnly = false,
+) {
   const { refreshUser } = useStore();
   const { notify } = useFeedback();
   const router = useRouter();
+
   const [botToken, setBotToken] = useState("");
   const [busy, setBusy] = useState(false);
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -42,7 +52,6 @@ export function useAuthForm(mode: AuthMode, token: string) {
       return;
     }
 
-    // Evitar solicitudes duplicadas.
     if (verificationAttempt.current === token) return;
 
     verificationAttempt.current = token;
@@ -77,7 +86,9 @@ export function useAuthForm(mode: AuthMode, token: string) {
     setError("");
     setFields({});
 
-    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const data = Object.fromEntries(
+      new FormData(event.currentTarget),
+    );
 
     try {
       const result = await send<AuthResponse>(
@@ -91,18 +102,40 @@ export function useAuthForm(mode: AuthMode, token: string) {
       );
 
       if (mode === "login") {
+        // Rechazar cuentas que no sean ADMIN en el acceso exclusivo.
+        if (adminOnly && result.rol !== "ADMIN") {
+          try {
+            await send("auth/logout", "POST");
+            await refreshUser();
+
+            setError(
+              "Esta cuenta no tiene permisos de administrador.",
+            );
+          } catch {
+            await refreshUser();
+
+            setError(
+              "No se pudo cerrar la sesión de esta cuenta. Cierra sesión antes de continuar.",
+            );
+          }
+
+          setBotToken("");
+          setReset((value) => value + 1);
+          return;
+        }
+
         // Sincronizar la sesión antes de navegar.
         await refreshUser();
 
-        const destination =
-          result.rol && result.rol !== "CLIENTE"
+        const destination = adminOnly
+          ? "/admin"
+          : result.rol && result.rol !== "CLIENTE"
             ? "/admin"
             : "/cuenta";
 
         router.push(destination);
         router.refresh();
       } else if (mode === "register") {
-        // Sincronizar la sesión creada durante el registro.
         await refreshUser();
 
         if (result.mailSent) {
@@ -116,7 +149,6 @@ export function useAuthForm(mode: AuthMode, token: string) {
           );
         }
 
-        // Entrar directamente a la tienda.
         router.replace("/");
         router.refresh();
       } else if (mode === "recover") {
@@ -130,7 +162,12 @@ export function useAuthForm(mode: AuthMode, token: string) {
         setFields(cause.fields);
       }
 
-      setError((cause as Error).message);
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "No se pudo completar la operación.",
+      );
+
       setBotToken("");
       setReset((value) => value + 1);
     } finally {
@@ -149,4 +186,3 @@ export function useAuthForm(mode: AuthMode, token: string) {
     handleSubmit,
   };
 }
-
