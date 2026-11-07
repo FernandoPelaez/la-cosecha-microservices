@@ -15,6 +15,16 @@ interface CheckoutAddressStepProps {
   onCancelAddress: () => void;
 }
 
+// Mantiene las opciones legibles en el selector nativo de pantallas pequeñas.
+function addressOptionLabel(item: Address, index: number): string {
+  const label = `${index + 1}. ${item.calle_numero} · ${item.colonia}`;
+  const maxLength = 29;
+
+  return label.length > maxLength
+    ? `${label.slice(0, maxLength - 1).trimEnd()}…`
+    : label;
+}
+
 export function CheckoutAddressStep({
   addresses,
   selectedAddress,
@@ -28,9 +38,11 @@ export function CheckoutAddressStep({
   return (
     <>
       <p className="eyebrow mb-3">Dirección de entrega</p>
+
       <h2 className="font-display text-3xl leading-tight text-(--text-primary) sm:text-4xl">
         ¿Dónde recibes tu pedido?
       </h2>
+
       <p className="mt-3 text-sm leading-6 text-(--text-secondary)">
         Selecciona uno de tus domicilios guardados.
       </p>
@@ -43,6 +55,7 @@ export function CheckoutAddressStep({
           >
             Elige tu domicilio
           </label>
+
           <span className="text-[11px] text-(--text-secondary)">
             {addresses.length}{" "}
             {addresses.length === 1
@@ -57,19 +70,24 @@ export function CheckoutAddressStep({
             aria-hidden="true"
             className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-(--brand-secondary)"
           />
+
           <select
             id="checkout-address"
             value={selectedAddressId || ""}
-            onChange={(event) => onSelectAddress(Number(event.target.value))}
+            onChange={(event) =>
+              onSelectAddress(Number(event.target.value))
+            }
             className="min-h-14 w-full min-w-0 appearance-none border-0 border-b-2 border-(--brand-secondary) bg-transparent py-3 pl-8 pr-9 text-sm font-medium text-(--text-primary) outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brand-secondary) sm:text-base"
           >
             <option value="">Selecciona un domicilio</option>
-            {addresses.map((item) => (
+
+            {addresses.map((item, index) => (
               <option key={item.id} value={item.id}>
-                {item.calle_numero} · {item.colonia}, {item.ciudad}
+                {addressOptionLabel(item, index)}
               </option>
             ))}
           </select>
+
           <ChevronDown
             size={19}
             aria-hidden="true"
@@ -82,6 +100,7 @@ export function CheckoutAddressStep({
             <p className="font-medium text-(--text-primary)">
               {selectedAddress.calle_numero}
             </p>
+
             <p className="text-(--text-secondary)">
               {selectedAddress.colonia}, {selectedAddress.ciudad} · CP{" "}
               {selectedAddress.codigo_postal}
@@ -101,7 +120,11 @@ export function CheckoutAddressStep({
             onClick={onAddAddress}
             className="mt-6 inline-flex min-h-11 max-w-full items-center gap-2 text-left text-sm font-semibold text-(--brand-secondary) underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brand-secondary)"
           >
-            <Plus size={18} className="shrink-0" aria-hidden="true" />
+            <Plus
+              size={18}
+              className="shrink-0"
+              aria-hidden="true"
+            />
             Agregar otro domicilio
           </button>
         ) : (
