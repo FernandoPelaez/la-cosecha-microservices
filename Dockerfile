@@ -46,6 +46,9 @@ COPY services ./services
 COPY scripts ./scripts
 COPY database ./database
 
+# Recursos necesarios para generar comprobantes PDF.
+COPY apps/web/public ./apps/web/public
+
 # Preparar los microservicios .NET.
 RUN dotnet restore \
     services/orders/RegistroPedidosService.csproj \
@@ -64,4 +67,3 @@ RUN dotnet restore \
 
 # Iniciar únicamente los servicios del backend.
 CMD ["node", "scripts/dev.mjs", "--production", "--services-only"]
-
