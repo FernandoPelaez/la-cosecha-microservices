@@ -1,46 +1,130 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
-  MapPin,
-  CreditCard,
-  ClipboardCheck,
+  ArrowLeft,
+  ArrowRight,
   Check,
-  LockKeyhole,
+  ClipboardCheck,
+  CreditCard,
+  MapPin,
 } from "lucide-react";
 import type { Address } from "@/types";
-import { api, send, money } from "@/lib/api";
+import { api, send } from "@/lib/api";
 import { useStore } from "@/components/providers";
 import { Button } from "@/components/ui/button";
-import { AddressForm } from "@/features/account/address-form";
-interface Method {
-  id: number;
-  nombre: string;
-  disponible: boolean;
-}
+import { CheckoutAddressStep } from "./checkout-address-step";
+import {
+  CheckoutPaymentStep,
+  type CheckoutPaymentMethod,
+} from "./checkout-payment-step";
+import { CheckoutReviewStep } from "./checkout-review-step";
+import { CheckoutSummary } from "./checkout-summary";
+
+const STEPS = [
+  { label: "Domicilio", icon: MapPin },
+  { label: "Pago", icon: CreditCard },
+  { label: "Revisar pedido", icon: ClipboardCheck },
+] as const;
+
 export function CheckoutPage() {
   const { user, loadingUser, cart, loadingCart, cartError, refreshCart } =
     useStore();
-  const [step, setStep] = useState(0),
-    [addresses, setAddresses] = useState<Address[]>([]),
-    [methods, setMethods] = useState<Method[]>([]),
-    [address, setAddress] = useState(0),
-    [method, setMethod] = useState(0),
-    [form, setForm] = useState(false),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+
+  const [step, setStep] = useState(0);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [methods, setMethods] = useState<CheckoutPaymentMethod[]>([]);
+  const [address, setAddress] = useState(0);
+  const [method, setMethod] = useState(0);
+  const [form, setForm] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const key = useRef("");
-  async function loadAddresses() {
+
+  const loadAddresses = useCallback(async () => {
     setAddresses(await api<Address[]>("addresses"));
-  }
-  useEffect(() => {
-    loadAddresses().catch((e) => setError(e.message));
-    api<Method[]>("payment-methods")
-      .then(setMethods)
-      .catch((e) => setError(e.message));
   }, []);
-  if (loadingUser || loadingCart) return <div className="page">Cargando…</div>;
-  if (!user)
+
+  useEffect(() => {
+    void loadAddresses().catch((cause) => {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "No se pudieron cargar los domicilios.",
+      );
+    });
+
+    void api<CheckoutPaymentMethod[]>("payment-methods")
+      .then(setMethods)
+      .catch((cause) => {
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "No se pudieron cargar los métodos de pago.",
+        );
+      });
+  }, [loadAddresses]);
+
+  function selectAddress(id: number) {
+    setAddress(id);
+    key.current = "";
+    setError("");
+  }
+
+  function selectMethod(id: number) {
+    setMethod(id);
+    key.current = "";
+    setError("");
+  }
+
+  function handleAddressSaved() {
+    void loadAddresses().catch((cause) => {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "No se pudieron actualizar los domicilios.",
+      );
+    });
+    setForm(false);
+  }
+
+  async function confirmCheckout() {
+    if (busy) return;
+
+    setBusy(true);
+    setError("");
+    key.current ||= crypto.randomUUID();
+
+    try {
+      const result = await send<{ url: string }>("checkout", "POST", {
+        id_direccion: address,
+        id_tipo_pago: method,
+        key: key.current,
+      });
+
+      const url = new URL(result.url);
+      if (
+        url.protocol !== "https:" ||
+        url.hostname !== "checkout.stripe.com"
+      ) {
+        throw new Error("El enlace de pago no es válido");
+      }
+
+      window.location.assign(url.href);
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "No se pudo iniciar el pago.",
+      );
+      setBusy(false);
+    }
+  }
+
+  if (loadingUser || loadingCart) {
+    return <div className="page">Cargando…</div>;
+  }
+
+  if (!user) {
     return (
       <div className="page">
         <p className="eyebrow mb-2">Último paso hacia tu mesa</p>
@@ -50,14 +134,20 @@ export function CheckoutPage() {
         </Link>
       </div>
     );
-  if (cartError)
+  }
+
+  if (cartError) {
     return (
       <div className="page" role="alert">
-        {cartError}
-        <Button onClick={() => void refreshCart()}>Reintentar</Button>
+        <p>{cartError}</p>
+        <Button className="mt-4" onClick={() => void refreshCart()}>
+          Reintentar
+        </Button>
       </div>
     );
-  if (!cart?.items.length)
+  }
+
+  if (!cart?.items.length) {
     return (
       <div className="page">
         <h1 className="page-title">Tu carrito está vacío</h1>
@@ -66,217 +156,154 @@ export function CheckoutPage() {
         </Link>
       </div>
     );
+  }
+
+  const selectedAddress = addresses.find((item) => item.id === address);
+  const selectedMethod = methods.find((item) => item.id === method);
+  const productCount = cart.items.reduce((sum, item) => sum + item.cantidad, 0);
   const total =
     cart.items.reduce(
-      (s, i) => s + Math.round(Number(i.precio_final) * 100) * i.cantidad,
+      (sum, item) =>
+        sum + Math.round(Number(item.precio_final) * 100) * item.cantidad,
       0,
     ) / 100;
+
   return (
     <div className="page">
-      <p className="eyebrow mb-2">Último paso hacia tu mesa</p>
-      <h1 className="page-title">Finalizar compra</h1>
-      <ol className="my-5 grid grid-cols-3 gap-2 text-xs sm:text-sm">
-        {[
-          [MapPin, "Domicilio"],
-          [CreditCard, "Pago"],
-          [ClipboardCheck, "Revisar pedido"],
-        ].map(([Icon, label], i) => {
-          const I = Icon as typeof MapPin;
-          return (
-            <li
-              key={i}
-              className={`flex flex-wrap items-center justify-center gap-2 rounded-lg border px-2 py-3 ${i === step ? "border-(--brand-primary) bg-white text-(--brand-primary)" : "border-(--border) text-(--text-secondary)"}`}
-            >
-              {step > i ? <Check size={16} /> : <I size={16} />} {String(label)}
-            </li>
-          );
-        })}
-      </ol>
-      {!user.correo_verificado && (
-        <p className="mb-6 rounded-lg border border-[#dcb787] bg-[#fff5df] p-4 text-sm">
-          Confirma tu correo para comprar.{" "}
-          <Link href="/cuenta" className="link">
-            Ir a mi cuenta
-          </Link>
+      <div className="mx-auto w-full max-w-6xl">
+        <p className="eyebrow">
+          Compra segura / Paso {String(step + 1).padStart(2, "0")} de 03
         </p>
-      )}
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="panel min-w-0 p-5 sm:p-6">
-          {step === 0 ? (
-            <>
-              <h2 className="font-display text-2xl">
-                ¿Dónde recibes tu pedido?
-              </h2>
-              <div className="my-5 space-y-3">
-                {addresses.map((a) => (
-                  <label
-                    key={a.id}
-                    className="flex cursor-pointer items-start gap-3 rounded-lg border border-(--border) p-4"
-                  >
-                    <input
-                      type="radio"
-                      name="address"
-                      checked={address === a.id}
-                      onChange={() => {
-                        setAddress(a.id);
-                        key.current = "";
-                      }}
-                    />
-                    <span className="text-sm leading-6">
-                      <strong>{a.calle_numero}</strong>
-                      <br />
-                      {a.colonia}, {a.ciudad}, CP {a.codigo_postal}
-                    </span>
-                  </label>
-                ))}
-              </div>
-              {form ? (
-                <AddressForm
-                  onSaved={() => {
-                    void loadAddresses();
-                    setForm(false);
-                  }}
-                  onCancel={() => setForm(false)}
-                />
+        <h1 className="mt-3 font-display text-4xl leading-tight tracking-tight text-(--text-primary) sm:text-5xl">
+          Finalizar compra
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-(--text-secondary)">
+          Tu compra está casi lista. Solo falta completar los siguientes pasos.
+        </p>
+
+        <ol
+          aria-label="Progreso de compra"
+          className="mb-9 mt-8 grid grid-cols-3 border-b border-(--border) sm:mb-12"
+        >
+          {STEPS.map(({ label, icon: Icon }, index) => (
+            <li
+              key={label}
+              aria-current={index === step ? "step" : undefined}
+              className={`flex min-w-0 items-center justify-center gap-1.5 border-b-2 px-1 pb-3 text-xs font-medium sm:justify-start sm:gap-2 sm:px-3 sm:text-sm ${
+                index === step
+                  ? "border-(--brand-primary) text-(--brand-primary)"
+                  : index < step
+                    ? "border-transparent text-(--brand-secondary)"
+                    : "border-transparent text-(--text-secondary)"
+              }`}
+            >
+              {index < step ? (
+                <Check size={16} aria-hidden="true" className="shrink-0" />
               ) : (
-                <Button variant="add" onClick={() => setForm(true)}>
-                  Agregar domicilio
+                <Icon size={16} aria-hidden="true" className="shrink-0" />
+              )}
+              <span className="sm:hidden">
+                {index === 2 ? "Revisar" : label}
+              </span>
+              <span className="hidden sm:inline">{label}</span>
+            </li>
+          ))}
+        </ol>
+
+        {!user.correo_verificado && (
+          <p className="mb-8 border-l-2 border-(--brand-primary) bg-[#fff5df] px-4 py-3 text-sm text-(--text-primary)">
+            Confirma tu correo para comprar.{" "}
+            <Link href="/cuenta" className="link">
+              Ir a mi cuenta
+            </Link>
+          </p>
+        )}
+
+        <div className="grid min-w-0 items-start gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-x-14 lg:gap-y-10">
+          <section className="min-w-0" aria-label={STEPS[step].label}>
+            {step === 0 ? (
+              <CheckoutAddressStep
+                addresses={addresses}
+                selectedAddress={selectedAddress}
+                selectedAddressId={address}
+                isAddingAddress={form}
+                onSelectAddress={selectAddress}
+                onAddAddress={() => setForm(true)}
+                onSavedAddress={handleAddressSaved}
+                onCancelAddress={() => setForm(false)}
+              />
+            ) : step === 1 ? (
+              <CheckoutPaymentStep
+                methods={methods}
+                selectedMethodId={method}
+                onSelectMethod={selectMethod}
+              />
+            ) : (
+              <CheckoutReviewStep
+                selectedAddress={selectedAddress}
+                paymentMethodName={selectedMethod?.nombre}
+                items={cart.items}
+              />
+            )}
+
+            {error && (
+              <p role="alert" className="mt-6 text-sm text-(--action-danger)">
+                {error}
+              </p>
+            )}
+          </section>
+
+          <CheckoutSummary productCount={productCount} total={total} />
+
+          <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+            <div className="flex flex-col-reverse items-stretch gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between lg:border-t lg:border-(--border) lg:pt-6">
+              {step === 0 ? (
+                <Link
+                  href="/carrito"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 text-sm font-medium text-(--brand-secondary) hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brand-secondary) sm:justify-start"
+                >
+                  <ArrowLeft size={17} aria-hidden="true" />
+                  Volver al carrito
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setStep((current) => current - 1)}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 text-sm font-medium text-(--brand-secondary) hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brand-secondary) disabled:cursor-not-allowed disabled:opacity-50 sm:justify-start"
+                >
+                  <ArrowLeft size={17} aria-hidden="true" />
+                  Anterior
+                </button>
+              )}
+
+              {step < 2 ? (
+                <Button
+                  variant="buy"
+                  disabled={step === 0 ? !selectedAddress : !selectedMethod}
+                  onClick={() => {
+                    setError("");
+                    setStep((current) => current + 1);
+                  }}
+                  className="w-full sm:w-auto sm:min-w-40"
+                >
+                  Continuar
+                  <ArrowRight size={17} aria-hidden="true" />
+                </Button>
+              ) : (
+                <Button
+                  variant="buy"
+                  busy={busy}
+                  disabled={!user.correo_verificado}
+                  onClick={() => void confirmCheckout()}
+                  className="w-full sm:w-auto sm:min-w-44"
+                >
+                  Confirmar y pagar
+                  <ArrowRight size={17} aria-hidden="true" />
                 </Button>
               )}
-            </>
-          ) : step === 1 ? (
-            <>
-              <h2 className="font-display text-2xl">Selecciona cómo pagar</h2>
-              <div className="my-5 space-y-3">
-                {methods.map((m) => (
-                  <label
-                    key={m.id}
-                    className="flex gap-3 rounded-lg border border-(--border) p-4 text-sm"
-                  >
-                    <input
-                      type="radio"
-                      checked={method === m.id}
-                      disabled={!m.disponible}
-                      onChange={() => {
-                        setMethod(m.id);
-                        key.current = "";
-                      }}
-                    />
-                    {m.nombre}
-                    {!m.disponible && (
-                      <span className="text-(--action-danger)">
-                        No disponible
-                      </span>
-                    )}
-                  </label>
-                ))}
-              </div>
-              {!methods.some((m) => m.disponible) && (
-                <p className="text-sm text-(--text-secondary)">
-                  Los pagos en línea aún no están disponibles. Tu carrito se
-                  conserva.
-                </p>
-              )}
-              <p className="text-xs leading-6 text-(--text-secondary)">
-                La captura y validación de tu tarjeta se realiza en la página
-                segura del procesador de pagos.
-              </p>
-            </>
-          ) : (
-            <>
-              <h2 className="font-display text-2xl">Revisa tu pedido</h2>
-              <p className="my-4 text-sm">
-                {addresses.find((a) => a.id === address)?.calle_numero} ·{" "}
-                {methods.find((m) => m.id === method)?.nombre}
-              </p>
-              <ul className="divide-y divide-(--border)">
-                {cart.items.map((i) => (
-                  <li
-                    key={i.id_producto}
-                    className="flex justify-between gap-4 py-4 text-sm"
-                  >
-                    <span>
-                      {i.cantidad} × {i.nombre}
-                    </span>
-                    <strong>
-                      {money(Number(i.precio_final) * i.cantidad)}
-                    </strong>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-          {error && (
-            <p role="alert" className="my-4 text-sm text-(--action-danger)">
-              {error}
-            </p>
-          )}
-          <div className="mt-7 flex justify-between gap-3">
-            {step > 0 ? (
-              <Button disabled={busy} onClick={() => setStep((s) => s - 1)}>
-                Anterior
-              </Button>
-            ) : (
-              <Link href="/carrito" className="link self-center text-sm">
-                Volver al carrito
-              </Link>
-            )}
-            {step < 2 ? (
-              <Button
-                variant="send"
-                disabled={step === 0 ? !address : !method}
-                onClick={() => setStep((s) => s + 1)}
-              >
-                Continuar
-              </Button>
-            ) : (
-              <Button
-                variant="buy"
-                busy={busy}
-                disabled={!user.correo_verificado}
-                onClick={async () => {
-                  if (busy) return;
-                  setBusy(true);
-                  setError("");
-                  key.current ||= crypto.randomUUID();
-                  try {
-                    const r = await send<{ url: string }>("checkout", "POST", {
-                      id_direccion: address,
-                      id_tipo_pago: method,
-                      key: key.current,
-                    });
-                    const url = new URL(r.url);
-                    if (
-                      url.protocol !== "https:" ||
-                      url.hostname !== "checkout.stripe.com"
-                    )
-                      throw new Error("El enlace de pago no es válido");
-                    window.location.assign(url.href);
-                  } catch (e) {
-                    setError((e as Error).message);
-                    setBusy(false);
-                  }
-                }}
-              >
-                Confirmar y pagar
-              </Button>
-            )}
+            </div>
           </div>
-        </div>
-        <div className="panel h-fit p-5">
-          <p className="eyebrow mb-2">Resumen del pedido</p>
-          <h2 className="font-display text-2xl">Tu compra</h2>
-          <p className="my-4 text-sm text-(--text-secondary)">
-            {cart.items.reduce((s, i) => s + i.cantidad, 0)} productos
-          </p>
-          <div className="flex justify-between border-t border-(--border) pt-5">
-            <strong>Total</strong>
-            <strong>{money(total)} MXN</strong>
-          </div>
-          <p className="mt-5 flex items-center gap-2 text-xs text-(--text-secondary)">
-            <LockKeyhole size={14} />
-            Pago con tarjeta mediante Stripe
-          </p>
         </div>
       </div>
     </div>
